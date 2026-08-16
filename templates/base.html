@@ -1,0 +1,101 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block title %}Shift Tracker{% endblock %}
+    </title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap"
+        rel="stylesheet"
+    >
+    <link href="{% static 'css/output.css' %}" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-stone-50 font-sans text-stone-800 antialiased {% block body_class %}{% endblock %}">
+    {% block header %}
+    <header class="border-b border-stone-200/80 bg-white/80 backdrop-blur">
+        <nav class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
+            <a href="/" class="flex items-center gap-2.5 text-stone-900">
+                <span class="flex size-8 items-center justify-center rounded-lg bg-teal-800 text-white shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
+                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .192.078.384.22.53l3.5 3.25a.75.75 0 1 0 1.06-1.06l-3.28-3.045V6Z" clip-rule="evenodd" />
+                    </svg>
+                </span>
+                <span class="font-serif text-lg tracking-tight">Shift Tracker</span>
+            </a>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                {% if user.is_authenticated %}
+                    <span class="hidden max-w-56 truncate rounded-full bg-stone-100 px-3 py-1 text-sm text-stone-600 sm:inline">
+                        {{ user.email }}
+                    </span>
+                    <a
+                        href="{% url 'account_logout' %}"
+                        class="rounded-lg px-3 py-1.5 text-sm font-medium text-stone-600 transition hover:bg-stone-100 hover:text-stone-900"
+                    >
+                        Log out
+                    </a>
+                {% else %}
+                    <a
+                        href="{% url 'account_login' %}"
+                        class="rounded-lg px-3 py-1.5 text-sm font-medium text-stone-600 transition hover:bg-stone-100 hover:text-stone-900"
+                    >
+                        Log in
+                    </a>
+                    <a
+                        href="{% url 'account_signup' %}"
+                        class="rounded-lg bg-teal-800 px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-teal-700"
+                    >
+                        Sign up
+                    </a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+    {% endblock %}
+
+    {% if messages %}
+        <div class="mx-auto w-full max-w-lg space-y-2 px-4 pt-4">
+            {% for message in messages %}
+                <div
+                    data-toast
+                    class="flex items-start justify-between gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-700 shadow-sm transition duration-300"
+                >
+                    <p>{{ message }}</p>
+                    <button
+                        type="button"
+                        data-toast-close
+                        class="rounded-md p-0.5 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
+                        aria-label="Dismiss"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
+                            <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                        </svg>
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        document.querySelectorAll("[data-toast]").forEach((toast) => {
+            const dismiss = () => {
+                window.clearTimeout(timer);
+                toast.classList.add("opacity-0", "-translate-y-1");
+                window.setTimeout(() => toast.remove(), 300);
+            };
+
+            const timer = window.setTimeout(dismiss, 3000);
+            toast.querySelector("[data-toast-close]")?.addEventListener("click", dismiss);
+        });
+    </script>
+</body>
+</html>
