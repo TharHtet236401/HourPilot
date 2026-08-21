@@ -71,6 +71,16 @@ class Shift(models.Model):
     def duration_hours(self):
         return Decimal(self.duration_minutes()) / Decimal("60")
 
+    def duration_display(self):
+        minutes = max(self.duration_minutes(), 0)
+        hours, remaining = divmod(minutes, 60)
+
+        if hours and remaining:
+            return f"{hours}h {remaining}m"
+        if hours:
+            return f"{hours}h"
+        return f"{remaining}m"
+
     def estimated_earnings(self):
         return (
             self.duration_hours()
