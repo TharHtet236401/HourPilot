@@ -58,10 +58,10 @@
     </header>
     {% endblock %}
 
-    <div id="toast-container" class="fixed inset-x-0 top-4 z-[70] mx-auto w-full max-w-lg space-y-2 px-4">
+    <div id="toast-container" class="pointer-events-none fixed inset-x-0 top-4 z-[70] mx-auto w-full max-w-lg space-y-2 px-4">
         {% if messages %}
             {% for message in messages %}
-                {% include "partials/toast.html" with message=message %}
+                {% include "partials/toast.html" with text=message level=message.level_tag %}
             {% endfor %}
         {% endif %}
     </div>
@@ -74,22 +74,26 @@
 
     <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"></script>
     <script>
+        function dismissToast(toast) {
+            if (!toast || toast.dataset.leaving === "true") {
+                return;
+            }
+            toast.dataset.leaving = "true";
+            window.clearTimeout(Number(toast.dataset.timer || 0));
+            toast.classList.add("opacity-0", "-translate-y-1");
+            window.setTimeout(() => toast.remove(), 300);
+        }
+
+        function armToast(toast) {
+            if (toast.dataset.bound === "true") {
+                return;
+            }
+            toast.dataset.bound = "true";
+            toast.dataset.timer = String(window.setTimeout(() => dismissToast(toast), 3000));
+        }
+
         function initToasts(root = document) {
-            root.querySelectorAll("[data-toast]").forEach((toast) => {
-                if (toast.dataset.bound === "true") {
-                    return;
-                }
-                toast.dataset.bound = "true";
-
-                const dismiss = () => {
-                    window.clearTimeout(timer);
-                    toast.classList.add("opacity-0", "-translate-y-1");
-                    window.setTimeout(() => toast.remove(), 300);
-                };
-
-                const timer = window.setTimeout(dismiss, 3000);
-                toast.querySelector("[data-toast-close]")?.addEventListener("click", dismiss);
-            });
+            root.querySelectorAll("[data-toast]").forEach(armToast);
         }
 
         function closeModal() {
@@ -99,8 +103,18 @@
             }
         }
 
+        const toastContainer = document.getElementById("toast-container");
+        toastContainer?.addEventListener("click", (event) => {
+            const closeButton = event.target.closest("[data-toast-close]");
+            if (!closeButton) {
+                return;
+            }
+            event.preventDefault();
+            dismissToast(closeButton.closest("[data-toast]"));
+        });
+
         document.addEventListener("DOMContentLoaded", () => initToasts());
-        document.addEventListener("htmx:afterSwap", (event) => initToasts(event.detail.target));
+        document.addEventListener("htmx:afterSwap", () => initToasts());
         document.addEventListener("keydown", (event) => {
             if (event.key === "Escape") {
                 closeModal();
