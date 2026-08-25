@@ -31,7 +31,9 @@
     @apply text-xs text-stone-500;
   }
 
-  .form-control .helptext a {
-    @apply font-medium text-teal-800 underline-offset-2 hover:underline;
+  .form-control input[aria-invalid="true"],
+  .form-control select[aria-invalid="true"],
+  .form-control textarea[aria-invalid="true"] {
+    @apply border-red-400 focus:border-red-500 focus:ring-red-500/15;
   }
 }
