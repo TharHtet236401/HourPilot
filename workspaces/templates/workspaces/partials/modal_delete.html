@@ -1,0 +1,95 @@
+<div
+    class="fixed inset-0 z-[60] flex items-end justify-center bg-stone-900/40 p-4 sm:items-center"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="workplace-delete-title"
+    onclick="if (event.target === this) closeModal()"
+>
+    <div class="w-full max-w-md rounded-2xl border border-stone-200 bg-white p-6 shadow-xl">
+        <div class="flex items-start justify-between gap-3">
+            <div>
+                <p class="text-xs font-medium uppercase tracking-[0.18em] {% if can_delete %}text-red-700{% else %}text-stone-500{% endif %}">
+                    {% if can_delete %}Delete{% else %}Cannot delete{% endif %}
+                </p>
+                <h2 id="workplace-delete-title" class="mt-1 font-serif text-2xl tracking-tight text-stone-900">
+                    {% if can_delete %}
+                        Delete {{ workplace.name }}?
+                    {% else %}
+                        {{ workplace.name }} has shifts
+                    {% endif %}
+                </h2>
+            </div>
+            <button
+                type="button"
+                onclick="closeModal()"
+                class="rounded-lg p-1 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
+                aria-label="Close"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                    <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                </svg>
+            </button>
+        </div>
+
+        {% if can_delete %}
+            <p class="mt-3 text-sm leading-6 text-stone-500">
+                This workplace has no shifts. Deleting it cannot be undone.
+            </p>
+        {% else %}
+            <p class="mt-3 text-sm leading-6 text-stone-500">
+                {{ workplace.name }} has {{ shift_count }} shift{{ shift_count|pluralize }} linked to it,
+                so it cannot be deleted. Remove those shifts first, or mark the workplace inactive instead.
+            </p>
+        {% endif %}
+
+        {% if error %}
+            <div class="mt-4 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        {% if can_delete %}
+            <form
+                method="post"
+                hx-post="{% url 'workplace_delete' workplace.pk %}"
+                hx-target="#modal"
+                hx-swap="innerHTML"
+                class="mt-6 flex items-center justify-end gap-2"
+            >
+                {% csrf_token %}
+                <button
+                    type="button"
+                    onclick="closeModal()"
+                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-stone-600 transition hover:bg-stone-100"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    class="rounded-xl bg-red-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-600"
+                >
+                    Delete workplace
+                </button>
+            </form>
+        {% else %}
+            <div class="mt-6 flex items-center justify-end gap-2">
+                <button
+                    type="button"
+                    onclick="closeModal()"
+                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-stone-600 transition hover:bg-stone-100"
+                >
+                    Close
+                </button>
+                <button
+                    type="button"
+                    hx-get="{% url 'workplace_update' workplace.pk %}"
+                    hx-target="#modal"
+                    hx-swap="innerHTML"
+                    class="rounded-xl bg-teal-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700"
+                >
+                    Edit workplace
+                </button>
+            </div>
+        {% endif %}
+    </div>
+</div>

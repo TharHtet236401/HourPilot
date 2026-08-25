@@ -1,6 +1,7 @@
 from datetime import date, datetime
 
 from django import forms
+from django.db.models import Q
 
 from workspaces.models import Workplace
 
@@ -45,10 +46,12 @@ class ShiftForm(forms.ModelForm):
 
     def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
-        workplaces = Workplace.objects.filter(
-            user=user,
-            is_active=True,
-        ).order_by("name")
+        workplaces = Workplace.objects.filter(user=user).filter(is_active=True)
+        if self.instance and self.instance.pk:
+            workplaces = Workplace.objects.filter(user=user).filter(
+                Q(is_active=True) | Q(pk=self.instance.workplace_id)
+            )
+        workplaces = workplaces.order_by("name")
         self.fields["workplace"].queryset = workplaces
         self.fields["workplace"].empty_label = "Select a workplace"
         self.fields["date"].input_formats = ["%Y-%m-%d"]

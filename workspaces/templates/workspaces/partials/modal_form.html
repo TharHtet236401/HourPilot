@@ -10,7 +10,7 @@
             <div>
                 <p class="text-xs font-medium uppercase tracking-[0.18em] text-teal-800">Workspace</p>
                 <h2 id="workplace-modal-title" class="mt-1 font-serif text-2xl tracking-tight text-stone-900">
-                    Add workplace
+                    {% if workplace %}Edit workplace{% else %}Add workplace{% endif %}
                 </h2>
             </div>
             <button
@@ -27,7 +27,7 @@
 
         <form
             method="post"
-            hx-post="{% url 'workplace_create' %}"
+            hx-post="{% if workplace %}{% url 'workplace_update' workplace.pk %}{% else %}{% url 'workplace_create' %}{% endif %}"
             hx-target="#modal"
             hx-swap="innerHTML"
             class="form-control mt-6 space-y-4"
@@ -42,20 +42,32 @@
 
             {% if form.non_field_errors %}
                 <div class="rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
-                    {{ form.non_field_errors }}
+                    {% for err in form.non_field_errors %}
+                        <p>{{ err }}</p>
+                    {% endfor %}
                 </div>
             {% endif %}
 
             {% for field in form.visible_fields %}
-                <div>
-                    <label for="{{ field.id_for_label }}" class="text-sm font-medium text-stone-700">
-                        {{ field.label }}
+                {% if field.field.widget.input_type == "checkbox" %}
+                    <label class="flex items-center gap-2.5 text-sm text-stone-600">
+                        {{ field }}
+                        <span>{{ field.label }}</span>
                     </label>
-                    {{ field }}
-                    {% if field.errors %}
-                        <p class="mt-1.5 text-sm text-red-600">{{ field.errors|striptags }}</p>
-                    {% endif %}
-                </div>
+                    {% for err in field.errors %}
+                        <p class="mt-1.5 text-sm text-red-600">{{ err }}</p>
+                    {% endfor %}
+                {% else %}
+                    <div>
+                        <label for="{{ field.id_for_label }}" class="text-sm font-medium text-stone-700">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {% for err in field.errors %}
+                            <p class="mt-1.5 text-sm text-red-600">{{ err }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             {% endfor %}
 
             <div class="flex items-center justify-end gap-2 pt-2">
@@ -70,7 +82,7 @@
                     type="submit"
                     class="rounded-xl bg-teal-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700"
                 >
-                    Save workplace
+                    {% if workplace %}Save changes{% else %}Save workplace{% endif %}
                 </button>
             </div>
         </form>

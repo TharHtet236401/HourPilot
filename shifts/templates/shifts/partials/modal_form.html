@@ -10,7 +10,7 @@
             <div>
                 <p class="text-xs font-medium uppercase tracking-[0.18em] text-teal-800">Shift</p>
                 <h2 id="shift-modal-title" class="mt-1 font-serif text-2xl tracking-tight text-stone-900">
-                    Add shift
+                    {% if shift %}Edit shift{% else %}Add shift{% endif %}
                 </h2>
             </div>
             <button
@@ -27,7 +27,7 @@
 
         <form
             method="post"
-            hx-post="{% url 'shift_create' %}"
+            hx-post="{% if shift %}{% url 'shift_update' shift.pk %}{% else %}{% url 'shift_create' %}{% endif %}"
             hx-target="#modal"
             hx-swap="innerHTML"
             class="form-control mt-6 space-y-4"
@@ -42,8 +42,8 @@
 
             {% if form.non_field_errors %}
                 <div class="rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
-                    {% for error in form.non_field_errors %}
-                        <p>{{ error }}</p>
+                    {% for err in form.non_field_errors %}
+                        <p>{{ err }}</p>
                     {% endfor %}
                 </div>
             {% endif %}
@@ -54,8 +54,8 @@
                         {{ field.label }}
                     </label>
                     {{ field }}
-                    {% for error in field.errors %}
-                        <p class="mt-1.5 text-sm text-red-600">{{ error }}</p>
+                    {% for err in field.errors %}
+                        <p class="mt-1.5 text-sm text-red-600">{{ err }}</p>
                     {% endfor %}
                 </div>
             {% endfor %}
@@ -72,7 +72,7 @@
                     type="submit"
                     class="rounded-xl bg-teal-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700"
                 >
-                    Save shift
+                    {% if shift %}Save changes{% else %}Save shift{% endif %}
                 </button>
             </div>
         </form>
