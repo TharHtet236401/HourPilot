@@ -20,6 +20,7 @@ from .services import (
     dashboard_stats,
     empty_calendar_month,
     empty_dashboard_stats,
+    summarize_shifts,
 )
 
 
@@ -94,15 +95,7 @@ def _calendar_context(request):
     except (TypeError, ValueError):
         year, month = today.year, today.month
 
-    selected = None
-    selected_value = request.GET.get("day")
-    if selected_value:
-        try:
-            selected = date.fromisoformat(selected_value)
-        except ValueError:
-            selected = None
-
-    return calendar_month(request.user, year, month, selected)
+    return calendar_month(request.user, year, month)
 
 
 @login_required
@@ -123,6 +116,37 @@ def shift_calendar(request):
             else "shifts/calendar.html"
         )
         return render(request, template, empty_calendar_month())
+
+
+@login_required
+def calendar_day(request):
+    try:
+        selected = date.fromisoformat(request.GET.get("day", ""))
+        shifts = list(
+            request.user.shifts.filter(date=selected)
+            .select_related("workplace")
+            .order_by("start_time")
+        )
+        return render(
+            request,
+            "shifts/partials/modal_day.html",
+            {
+                "selected": selected,
+                "selected_shifts": shifts,
+                "day_summary": summarize_shifts(shifts),
+            },
+        )
+    except Exception:
+        return render(
+            request,
+            "shifts/partials/modal_day.html",
+            {
+                "selected": None,
+                "selected_shifts": [],
+                "day_summary": summarize_shifts([]),
+                "error": "Could not load this day.",
+            },
+        )
 
 
 @login_required

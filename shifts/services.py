@@ -160,8 +160,6 @@ def empty_calendar_month(year=None, month=None):
         "month": month,
         "title": first.strftime("%B %Y"),
         "weeks": [],
-        "selected": None,
-        "selected_shifts": [],
         "month_summary": _empty_summary(),
         "prev_year": prev_year,
         "prev_month": prev_month,
@@ -172,7 +170,7 @@ def empty_calendar_month(year=None, month=None):
     }
 
 
-def calendar_month(user, year, month, selected=None):
+def calendar_month(user, year, month):
     today = timezone.localdate()
     first, last, prev_year, prev_month, next_year, next_month = _month_bounds(
         year, month
@@ -185,11 +183,6 @@ def calendar_month(user, year, month, selected=None):
     by_day = defaultdict(list)
     for shift in shifts:
         by_day[shift.date].append(shift)
-
-    if selected and selected.month != month:
-        selected = None
-    if selected is None and today.year == year and today.month == month:
-        selected = today
 
     weeks = []
     for week in calendar.Calendar(firstweekday=calendar.MONDAY).monthdatescalendar(
@@ -205,7 +198,6 @@ def calendar_month(user, year, month, selected=None):
                     "date": day,
                     "in_month": day.month == month,
                     "is_today": day == today,
-                    "is_selected": selected == day,
                     "shifts": day_shifts,
                     "workplaces": day_workplaces,
                     "color_key": (
@@ -223,8 +215,6 @@ def calendar_month(user, year, month, selected=None):
         "month": month,
         "title": first.strftime("%B %Y"),
         "weeks": weeks,
-        "selected": selected,
-        "selected_shifts": by_day.get(selected, []) if selected else [],
         "month_summary": summarize_shifts(shifts),
         "prev_year": prev_year,
         "prev_month": prev_month,
