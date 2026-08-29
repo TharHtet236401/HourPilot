@@ -43,6 +43,7 @@ def summarize_shifts(shifts):
 def workplace_breakdown(shifts):
     grouped = defaultdict(
         lambda: {
+            "id": None,
             "name": "",
             "count": 0,
             "minutes": 0,
@@ -52,6 +53,7 @@ def workplace_breakdown(shifts):
 
     for shift in shifts:
         row = grouped[shift.workplace_id]
+        row["id"] = shift.workplace_id
         row["name"] = shift.workplace.name
         row["count"] += 1
         row["minutes"] += max(shift.duration_minutes(), 0)
@@ -78,13 +80,19 @@ def empty_dashboard_stats():
         "workplace_count": 0,
         "by_workplace": [],
         "recent_shifts": [],
+        "workplaces": [],
+        "selected_workplace": None,
     }
 
 
-def dashboard_stats(user):
-    shifts = list(
-        user.shifts.select_related("workplace").order_by("-date", "-start_time")
+def dashboard_stats(user, workplace=None):
+    shifts_query = user.shifts.select_related("workplace").order_by(
+        "-date", "-start_time"
     )
+    if workplace:
+        shifts_query = shifts_query.filter(workplace=workplace)
+
+    shifts = list(shifts_query)
     today = timezone.localdate()
     week_start = today - timedelta(days=today.weekday())
     month_start = today.replace(day=1)
@@ -107,6 +115,8 @@ def dashboard_stats(user):
         "workplace_count": user.workplaces.count(),
         "by_workplace": workplace_breakdown(shifts),
         "recent_shifts": shifts[:5],
+        "workplaces": list(user.workplaces.order_by("name")),
+        "selected_workplace": workplace,
     }
 
 

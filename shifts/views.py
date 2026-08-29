@@ -32,19 +32,38 @@ def _shift_form_success(request, message):
     )
 
 
+def _dashboard_workplace(request):
+    workplace_id = request.GET.get("workplace")
+    if not workplace_id:
+        return None
+
+    try:
+        return Workplace.objects.get(pk=workplace_id, user=request.user)
+    except (Workplace.DoesNotExist, ValueError, TypeError):
+        return None
+
+
 @login_required
 def home(request):
     try:
-        return render(
-            request,
-            "shifts/home.html",
-            {"stats": dashboard_stats(request.user)},
+        workplace = _dashboard_workplace(request)
+        context = {"stats": dashboard_stats(request.user, workplace=workplace)}
+        template = (
+            "shifts/partials/dashboard.html"
+            if request.headers.get("HX-Request")
+            else "shifts/home.html"
         )
+        return render(request, template, context)
     except Exception:
         messages.error(request, "Could not load the dashboard.")
+        template = (
+            "shifts/partials/dashboard.html"
+            if request.headers.get("HX-Request")
+            else "shifts/home.html"
+        )
         return render(
             request,
-            "shifts/home.html",
+            template,
             {"stats": empty_dashboard_stats()},
         )
 
