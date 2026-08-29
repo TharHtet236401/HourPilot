@@ -3,9 +3,18 @@
 {% block header %}{% endblock %}
 
 {% block content %}
-<div class="flex min-h-screen flex-col md:flex-row">
-    <aside class="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur md:static md:z-auto md:flex md:w-64 md:flex-col md:border-b-0 md:border-r md:bg-white md:backdrop-blur-none">
-        <div class="flex items-center justify-between gap-3 px-4 py-3 md:border-b-0 md:py-4">
+<div id="app-shell" class="flex min-h-screen md:flex-row">
+    <div
+        id="sidebar-backdrop"
+        class="fixed inset-0 z-40 bg-stone-900/40 opacity-0 pointer-events-none transition-opacity duration-200 md:hidden"
+        data-sidebar-close
+    ></div>
+
+    <aside
+        id="app-sidebar"
+        class="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[85vw] -translate-x-full flex-col border-r border-stone-200 bg-white transition-transform duration-200 md:static md:z-auto md:w-64 md:max-w-none md:translate-x-0"
+    >
+        <div class="flex items-center justify-between gap-3 px-4 py-3 md:py-4">
             <a href="{% url 'home' %}" class="flex min-h-11 items-center gap-2.5 text-stone-900">
                 <span class="flex size-8 items-center justify-center rounded-lg bg-teal-800 text-white shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
@@ -14,51 +23,82 @@
                 </span>
                 <span class="font-serif text-lg tracking-tight">Shift Tracker</span>
             </a>
+            <button
+                type="button"
+                class="inline-flex size-11 items-center justify-center rounded-lg text-stone-500 transition hover:bg-stone-100 hover:text-stone-900 md:hidden"
+                data-sidebar-close
+                aria-label="Close menu"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                    <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                </svg>
+            </button>
+        </div>
+
+        <nav class="flex flex-1 flex-col gap-1 overflow-y-auto px-3 pb-3 md:px-4">
+            <a
+                href="{% url 'home' %}"
+                class="flex min-h-11 items-center gap-2.5 rounded-xl px-3 text-sm font-medium transition {% if request.resolver_match.url_name == 'home' %}bg-teal-800 text-white shadow-sm{% else %}text-stone-600 hover:bg-stone-100 hover:text-stone-900{% endif %}"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
+                    <path fill-rule="evenodd" d="M9.293 2.293a1 1 0 0 1 1.414 0l7 7A1 1 0 0 1 17 11h-1v6a1 1 0 0 1-1 1h-3a1 1 0 0 1-1-1v-3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6H2a1 1 0 0 1-.707-1.707l7-7Z" clip-rule="evenodd" />
+                </svg>
+                Home
+            </a>
+            <a
+                href="{% url 'workplace_list' %}"
+                class="flex min-h-11 items-center gap-2.5 rounded-xl px-3 text-sm font-medium transition {% if request.resolver_match.url_name == 'workplace_list' %}bg-teal-800 text-white shadow-sm{% else %}text-stone-600 hover:bg-stone-100 hover:text-stone-900{% endif %}"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
+                    <path fill-rule="evenodd" d="M4.25 2A2.25 2.25 0 0 0 2 4.25v11.5A2.25 2.25 0 0 0 4.25 18h11.5A2.25 2.25 0 0 0 18 15.75V4.25A2.25 2.25 0 0 0 15.75 2H4.25ZM3.5 4.25a.75.75 0 0 1 .75-.75h11.5a.75.75 0 0 1 .75.75v11.5a.75.75 0 0 1-.75.75H4.25a.75.75 0 0 1-.75-.75V4.25Z" clip-rule="evenodd" />
+                    <path d="M6 7.25A.75.75 0 0 1 6.75 6.5h6.5a.75.75 0 0 1 0 1.5h-6.5A.75.75 0 0 1 6 7.25ZM6.75 10a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Z" />
+                </svg>
+                Workspaces
+            </a>
+            <a
+                href="{% url 'shift_list' %}"
+                class="flex min-h-11 items-center gap-2.5 rounded-xl px-3 text-sm font-medium transition {% if request.resolver_match.url_name == 'shift_list' %}bg-teal-800 text-white shadow-sm{% else %}text-stone-600 hover:bg-stone-100 hover:text-stone-900{% endif %}"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .192.078.384.22.53l3 2.75a.75.75 0 0 0 1.06-1.06l-2.78-2.547V5Z" clip-rule="evenodd" />
+                </svg>
+                Shifts
+            </a>
+        </nav>
+
+        <div class="mt-auto flex items-center justify-between gap-2 border-t border-stone-200 px-4 py-4">
+            <span class="truncate text-xs text-stone-500">{{ user.email }}</span>
             <a
                 href="{% url 'account_logout' %}"
-                class="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-stone-500 transition hover:bg-stone-100 hover:text-stone-900 md:hidden"
+                class="shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-stone-500 transition hover:bg-stone-100 hover:text-stone-900"
             >
                 Log out
             </a>
         </div>
-
-        <div class="flex flex-1 flex-col px-3 pb-3 md:px-4 md:pb-4">
-            <nav class="grid grid-cols-2 gap-1 md:mt-2 md:flex md:flex-col">
-                <a
-                    href="{% url 'workplace_list' %}"
-                    class="flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-sm font-medium transition md:justify-start {% if request.resolver_match.url_name == 'workplace_list' %}bg-teal-800 text-white shadow-sm{% else %}text-stone-600 hover:bg-stone-100 hover:text-stone-900{% endif %}"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
-                        <path fill-rule="evenodd" d="M4.25 2A2.25 2.25 0 0 0 2 4.25v11.5A2.25 2.25 0 0 0 4.25 18h11.5A2.25 2.25 0 0 0 18 15.75V4.25A2.25 2.25 0 0 0 15.75 2H4.25ZM3.5 4.25a.75.75 0 0 1 .75-.75h11.5a.75.75 0 0 1 .75.75v11.5a.75.75 0 0 1-.75.75H4.25a.75.75 0 0 1-.75-.75V4.25Z" clip-rule="evenodd" />
-                        <path d="M6 7.25A.75.75 0 0 1 6.75 6.5h6.5a.75.75 0 0 1 0 1.5h-6.5A.75.75 0 0 1 6 7.25ZM6.75 10a.75.75 0 0 0 0 1.5h6.5a.75.75 0 0 0 0-1.5h-6.5Z" />
-                    </svg>
-                    Workspaces
-                </a>
-                <a
-                    href="{% url 'shift_list' %}"
-                    class="flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-sm font-medium transition md:justify-start {% if request.resolver_match.url_name == 'shift_list' %}bg-teal-800 text-white shadow-sm{% else %}text-stone-600 hover:bg-stone-100 hover:text-stone-900{% endif %}"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-13a.75.75 0 0 0-1.5 0v5c0 .192.078.384.22.53l3 2.75a.75.75 0 0 0 1.06-1.06l-2.78-2.547V5Z" clip-rule="evenodd" />
-                    </svg>
-                    Shifts
-                </a>
-            </nav>
-
-            <div class="mt-auto hidden items-center justify-between gap-2 border-t border-stone-200 px-1 pt-4 md:flex">
-                <span class="truncate text-xs text-stone-500">{{ user.email }}</span>
-                <a
-                    href="{% url 'account_logout' %}"
-                    class="shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-stone-500 transition hover:bg-stone-100 hover:text-stone-900"
-                >
-                    Log out
-                </a>
-            </div>
-        </div>
     </aside>
 
-    <div class="min-w-0 flex-1">
-        {% block app_content %}{% endblock %}
+    <div class="flex min-w-0 flex-1 flex-col">
+        <header class="sticky top-0 z-30 flex items-center gap-2 border-b border-stone-200 bg-white/95 px-3 py-2 backdrop-blur md:hidden">
+            <button
+                type="button"
+                class="inline-flex size-11 items-center justify-center rounded-lg text-stone-600 transition hover:bg-stone-100 hover:text-stone-900"
+                data-sidebar-open
+                aria-controls="app-sidebar"
+                aria-expanded="false"
+                aria-label="Open menu"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+            </button>
+            <a href="{% url 'home' %}" class="font-serif text-lg tracking-tight text-stone-900">
+                Shift Tracker
+            </a>
+        </header>
+
+        <div class="min-w-0 flex-1">
+            {% block app_content %}{% endblock %}
+        </div>
     </div>
 </div>
 {% endblock %}

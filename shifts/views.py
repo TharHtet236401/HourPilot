@@ -6,6 +6,7 @@ from workspaces.models import Workplace
 
 from .forms import ShiftForm
 from .models import Shift
+from .services import dashboard_stats, empty_dashboard_stats
 
 
 def _user_shifts(user):
@@ -26,10 +27,18 @@ def _shift_form_success(request, message):
 @login_required
 def home(request):
     try:
-        return render(request, "shifts/home.html")
+        return render(
+            request,
+            "shifts/home.html",
+            {"stats": dashboard_stats(request.user)},
+        )
     except Exception:
-        messages.error(request, "Could not load the home page.")
-        return render(request, "shifts/home.html")
+        messages.error(request, "Could not load the dashboard.")
+        return render(
+            request,
+            "shifts/home.html",
+            {"stats": empty_dashboard_stats()},
+        )
 
 
 @login_required

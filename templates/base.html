@@ -103,6 +103,27 @@
             }
         }
 
+        function isSidebarOpen() {
+            return document.getElementById("app-shell")?.classList.contains("is-open");
+        }
+
+        function setSidebarOpen(open) {
+            const shell = document.getElementById("app-shell");
+            const sidebar = document.getElementById("app-sidebar");
+            const backdrop = document.getElementById("sidebar-backdrop");
+            const toggle = document.querySelector("[data-sidebar-open]");
+            if (!shell || !sidebar || !backdrop) {
+                return;
+            }
+
+            shell.classList.toggle("is-open", open);
+            sidebar.classList.toggle("-translate-x-full", !open);
+            backdrop.classList.toggle("opacity-0", !open);
+            backdrop.classList.toggle("pointer-events-none", !open);
+            document.body.classList.toggle("overflow-hidden", open);
+            toggle?.setAttribute("aria-expanded", open ? "true" : "false");
+        }
+
         const toastContainer = document.getElementById("toast-container");
         toastContainer?.addEventListener("click", (event) => {
             const closeButton = event.target.closest("[data-toast-close]");
@@ -115,9 +136,27 @@
 
         document.addEventListener("DOMContentLoaded", () => initToasts());
         document.addEventListener("htmx:afterSwap", () => initToasts());
+        document.addEventListener("click", (event) => {
+            if (event.target.closest("[data-sidebar-open]")) {
+                setSidebarOpen(true);
+            }
+            if (event.target.closest("[data-sidebar-close]")) {
+                setSidebarOpen(false);
+            }
+        });
         document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape") {
-                closeModal();
+            if (event.key !== "Escape") {
+                return;
+            }
+            if (isSidebarOpen()) {
+                setSidebarOpen(false);
+                return;
+            }
+            closeModal();
+        });
+        window.addEventListener("resize", () => {
+            if (window.matchMedia("(min-width: 768px)").matches && isSidebarOpen()) {
+                setSidebarOpen(false);
             }
         });
     </script>
