@@ -5,6 +5,12 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 
+from config.pagination import (
+    SHIFT_PAGE_SIZE,
+    list_page_url,
+    page_number_from_request,
+    paginate,
+)
 from workspaces.models import Workplace
 
 from .forms import ShiftForm
@@ -21,15 +27,26 @@ def _user_shifts(user):
     return user.shifts.select_related("workplace").order_by("-date", "-start_time")
 
 
-def _shift_form_success(request, message):
-    return render(
-        request,
-        "shifts/partials/list_refresh.html",
-        {
-            "shifts": _user_shifts(request.user),
-            "message": message,
-        },
+def _shift_list_context(request, page=None):
+    page_obj = paginate(
+        _user_shifts(request.user),
+        page if page is not None else page_number_from_request(request),
+        SHIFT_PAGE_SIZE,
     )
+    return {
+        "shifts": page_obj.object_list,
+        "page_obj": page_obj,
+        "page_url_name": "shift_list",
+        "list_target": "#shift-list",
+    }
+
+
+def _shift_form_success(request, message, page=None):
+    context = _shift_list_context(request, page=page)
+    context["message"] = message
+    response = render(request, "shifts/partials/list_refresh.html", context)
+    response["HX-Push-Url"] = list_page_url("shift_list", context["page_obj"].number)
+    return response
 
 
 def _dashboard_workplace(request):
@@ -111,18 +128,29 @@ def shift_calendar(request):
 @login_required
 def shift_list(request):
     try:
-        shifts = _user_shifts(request.user)
-        return render(
-            request,
-            "shifts/list.html",
-            {"shifts": shifts},
+        context = _shift_list_context(request)
+        template = (
+            "shifts/partials/list.html"
+            if request.headers.get("HX-Request")
+            else "shifts/list.html"
         )
+        return render(request, template, context)
     except Exception:
         messages.error(request, "Could not load your shifts.")
+        template = (
+            "shifts/partials/list.html"
+            if request.headers.get("HX-Request")
+            else "shifts/list.html"
+        )
         return render(
             request,
-            "shifts/list.html",
-            {"shifts": []},
+            template,
+            {
+                "shifts": [],
+                "page_obj": None,
+                "page_url_name": "shift_list",
+                "list_target": "#shift-list",
+            },
         )
 
 
@@ -147,7 +175,7 @@ def shift_create(request):
                 shift.user = request.user
                 shift.hourly_rate_at_time = shift.workplace.hourly_rate
                 shift.save()
-                return _shift_form_success(request, "Shift added.")
+                return _shift_form_success(request, "Shift added.", page=1)
         else:
             form = ShiftForm(user=request.user)
 

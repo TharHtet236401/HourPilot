@@ -1,0 +1,70 @@
+{% if page_obj and page_obj.paginator.num_pages > 1 %}
+    <nav class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" aria-label="Pagination">
+        <p class="text-sm text-stone-500">
+            Showing {{ page_obj.start_index }}–{{ page_obj.end_index }}
+            of {{ page_obj.paginator.count }}
+        </p>
+        <div class="flex flex-wrap items-center gap-2">
+            {% if page_obj.has_previous %}
+                <a
+                    href="{% if page_obj.previous_page_number == 1 %}{% url page_url_name %}{% else %}{% url page_url_name %}?page={{ page_obj.previous_page_number }}{% endif %}"
+                    hx-get="{% if page_obj.previous_page_number == 1 %}{% url page_url_name %}{% else %}{% url page_url_name %}?page={{ page_obj.previous_page_number }}{% endif %}"
+                    hx-target="{{ list_target }}"
+                    hx-swap="innerHTML show:window:top"
+                    hx-push-url="true"
+                    class="inline-flex min-h-11 items-center rounded-xl bg-stone-100 px-3.5 text-sm font-medium text-stone-700 transition hover:bg-stone-200"
+                >
+                    Previous
+                </a>
+            {% else %}
+                <span class="inline-flex min-h-11 cursor-not-allowed items-center rounded-xl bg-stone-100 px-3.5 text-sm font-medium text-stone-400">
+                    Previous
+                </span>
+            {% endif %}
+
+            {% if page_obj.paginator.num_pages <= 7 %}
+                <div class="flex items-center gap-1">
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if num == page_obj.number %}
+                            <span class="inline-flex size-11 items-center justify-center rounded-xl bg-teal-800 text-sm font-semibold text-white" aria-current="page">
+                                {{ num }}
+                            </span>
+                        {% else %}
+                            <a
+                                href="{% if num == 1 %}{% url page_url_name %}{% else %}{% url page_url_name %}?page={{ num }}{% endif %}"
+                                hx-get="{% if num == 1 %}{% url page_url_name %}{% else %}{% url page_url_name %}?page={{ num }}{% endif %}"
+                                hx-target="{{ list_target }}"
+                                hx-swap="innerHTML show:window:top"
+                                hx-push-url="true"
+                                class="inline-flex size-11 items-center justify-center rounded-xl bg-stone-100 text-sm font-medium text-stone-700 transition hover:bg-stone-200"
+                            >
+                                {{ num }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% else %}
+                <span class="px-1 text-sm font-medium text-stone-600">
+                    {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                </span>
+            {% endif %}
+
+            {% if page_obj.has_next %}
+                <a
+                    href="{% url page_url_name %}?page={{ page_obj.next_page_number }}"
+                    hx-get="{% url page_url_name %}?page={{ page_obj.next_page_number }}"
+                    hx-target="{{ list_target }}"
+                    hx-swap="innerHTML show:window:top"
+                    hx-push-url="true"
+                    class="inline-flex min-h-11 items-center rounded-xl bg-stone-100 px-3.5 text-sm font-medium text-stone-700 transition hover:bg-stone-200"
+                >
+                    Next
+                </a>
+            {% else %}
+                <span class="inline-flex min-h-11 cursor-not-allowed items-center rounded-xl bg-stone-100 px-3.5 text-sm font-medium text-stone-400">
+                    Next
+                </span>
+            {% endif %}
+        </div>
+    </nav>
+{% endif %}

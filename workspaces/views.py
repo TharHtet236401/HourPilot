@@ -4,6 +4,13 @@ from django.db.models import Count
 from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, render
 
+from config.pagination import (
+    WORKPLACE_PAGE_SIZE,
+    list_page_url,
+    page_number_from_request,
+    paginate,
+)
+
 from .forms import WorkplaceForm
 from .models import Workplace
 
@@ -16,32 +23,56 @@ def _user_workplaces(user):
     )
 
 
-def _workplace_form_success(request, message):
-    return render(
-        request,
-        "workspaces/partials/list_refresh.html",
-        {
-            "workplaces": _user_workplaces(request.user),
-            "message": message,
-        },
+def _workplace_list_context(request, page=None):
+    page_obj = paginate(
+        _user_workplaces(request.user),
+        page if page is not None else page_number_from_request(request),
+        WORKPLACE_PAGE_SIZE,
     )
+    return {
+        "workplaces": page_obj.object_list,
+        "page_obj": page_obj,
+        "page_url_name": "workplace_list",
+        "list_target": "#workplace-list",
+    }
+
+
+def _workplace_form_success(request, message, page=None):
+    context = _workplace_list_context(request, page=page)
+    context["message"] = message
+    response = render(request, "workspaces/partials/list_refresh.html", context)
+    response["HX-Push-Url"] = list_page_url(
+        "workplace_list", context["page_obj"].number
+    )
+    return response
 
 
 @login_required
 def workplace_list(request):
     try:
-        workplaces = _user_workplaces(request.user)
-        return render(
-            request,
-            "workspaces/list.html",
-            {"workplaces": workplaces},
+        context = _workplace_list_context(request)
+        template = (
+            "workspaces/partials/list.html"
+            if request.headers.get("HX-Request")
+            else "workspaces/list.html"
         )
+        return render(request, template, context)
     except Exception:
         messages.error(request, "Could not load your workspaces.")
+        template = (
+            "workspaces/partials/list.html"
+            if request.headers.get("HX-Request")
+            else "workspaces/list.html"
+        )
         return render(
             request,
-            "workspaces/list.html",
-            {"workplaces": []},
+            template,
+            {
+                "workplaces": [],
+                "page_obj": None,
+                "page_url_name": "workplace_list",
+                "list_target": "#workplace-list",
+            },
         )
 
 
@@ -54,7 +85,7 @@ def workplace_create(request):
                 workplace = form.save(commit=False)
                 workplace.user = request.user
                 workplace.save()
-                return _workplace_form_success(request, "Workplace added.")
+                return _workplace_form_success(request, "Workplace added.", page=1)
         else:
             form = WorkplaceForm()
 
