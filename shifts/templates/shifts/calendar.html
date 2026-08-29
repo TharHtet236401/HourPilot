@@ -1,0 +1,17 @@
+{% extends "app.html" %}
+
+{% block title %}Calendar | Shift Tracker{% endblock %}
+
+{% block app_content %}
+<div class="px-4 py-6 sm:px-8 sm:py-10">
+    <p class="text-xs font-medium uppercase tracking-[0.18em] text-teal-800">Calendar</p>
+    <h1 class="mt-2 font-serif text-2xl tracking-tight text-stone-900 sm:text-3xl">Worked days</h1>
+    <p class="mt-2 max-w-xl text-sm leading-6 text-stone-500">
+        See which days you worked, how long you were there, and at which workplace.
+    </p>
+
+    <div id="calendar-root" class="mt-6">
+        {% include "shifts/partials/calendar.html" %}
+    </div>
+</div>
+{% endblock %}

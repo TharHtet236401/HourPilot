@@ -1,5 +1,6 @@
+import calendar
 from collections import defaultdict
-from datetime import timedelta
+from datetime import date, timedelta
 from decimal import Decimal
 
 from django.utils import timezone
@@ -106,4 +107,101 @@ def dashboard_stats(user):
         "workplace_count": user.workplaces.count(),
         "by_workplace": workplace_breakdown(shifts),
         "recent_shifts": shifts[:5],
+    }
+
+
+def _month_bounds(year, month):
+    first = date(year, month, 1)
+    if month == 12:
+        last = date(year + 1, 1, 1) - timedelta(days=1)
+        next_year, next_month = year + 1, 1
+    else:
+        last = date(year, month + 1, 1) - timedelta(days=1)
+        next_year, next_month = year, month + 1
+
+    if month == 1:
+        prev_year, prev_month = year - 1, 12
+    else:
+        prev_year, prev_month = year, month - 1
+
+    return first, last, prev_year, prev_month, next_year, next_month
+
+
+def empty_calendar_month(year=None, month=None):
+    today = timezone.localdate()
+    year = year or today.year
+    month = month or today.month
+    first, last, prev_year, prev_month, next_year, next_month = _month_bounds(
+        year, month
+    )
+    return {
+        "year": year,
+        "month": month,
+        "title": first.strftime("%B %Y"),
+        "weeks": [],
+        "selected": None,
+        "selected_shifts": [],
+        "month_summary": _empty_summary(),
+        "prev_year": prev_year,
+        "prev_month": prev_month,
+        "next_year": next_year,
+        "next_month": next_month,
+        "weekday_labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    }
+
+
+def calendar_month(user, year, month, selected=None):
+    today = timezone.localdate()
+    first, last, prev_year, prev_month, next_year, next_month = _month_bounds(
+        year, month
+    )
+    shifts = list(
+        user.shifts.filter(date__gte=first, date__lte=last)
+        .select_related("workplace")
+        .order_by("start_time")
+    )
+    by_day = defaultdict(list)
+    for shift in shifts:
+        by_day[shift.date].append(shift)
+
+    if selected and selected.month != month:
+        selected = None
+    if selected is None and today.year == year and today.month == month:
+        selected = today
+
+    weeks = []
+    for week in calendar.Calendar(firstweekday=calendar.MONDAY).monthdatescalendar(
+        year, month
+    ):
+        days = []
+        for day in week:
+            day_shifts = by_day.get(day, [])
+            day_summary = summarize_shifts(day_shifts)
+            days.append(
+                {
+                    "date": day,
+                    "in_month": day.month == month,
+                    "is_today": day == today,
+                    "is_selected": selected == day,
+                    "shifts": day_shifts,
+                    "hours_display": day_summary["hours_display"],
+                    "pay": day_summary["pay"],
+                    "has_shifts": bool(day_shifts),
+                }
+            )
+        weeks.append(days)
+
+    return {
+        "year": year,
+        "month": month,
+        "title": first.strftime("%B %Y"),
+        "weeks": weeks,
+        "selected": selected,
+        "selected_shifts": by_day.get(selected, []) if selected else [],
+        "month_summary": summarize_shifts(shifts),
+        "prev_year": prev_year,
+        "prev_month": prev_month,
+        "next_year": next_year,
+        "next_month": next_month,
+        "weekday_labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     }

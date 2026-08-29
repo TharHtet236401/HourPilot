@@ -1,12 +1,20 @@
+from datetime import date
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
+from django.utils import timezone
 
 from workspaces.models import Workplace
 
 from .forms import ShiftForm
 from .models import Shift
-from .services import dashboard_stats, empty_dashboard_stats
+from .services import (
+    calendar_month,
+    dashboard_stats,
+    empty_calendar_month,
+    empty_dashboard_stats,
+)
 
 
 def _user_shifts(user):
@@ -39,6 +47,46 @@ def home(request):
             "shifts/home.html",
             {"stats": empty_dashboard_stats()},
         )
+
+
+def _calendar_context(request):
+    today = timezone.localdate()
+    try:
+        year = int(request.GET.get("year", today.year))
+        month = int(request.GET.get("month", today.month))
+        date(year, month, 1)
+    except (TypeError, ValueError):
+        year, month = today.year, today.month
+
+    selected = None
+    selected_value = request.GET.get("day")
+    if selected_value:
+        try:
+            selected = date.fromisoformat(selected_value)
+        except ValueError:
+            selected = None
+
+    return calendar_month(request.user, year, month, selected)
+
+
+@login_required
+def shift_calendar(request):
+    try:
+        context = _calendar_context(request)
+        template = (
+            "shifts/partials/calendar.html"
+            if request.headers.get("HX-Request")
+            else "shifts/calendar.html"
+        )
+        return render(request, template, context)
+    except Exception:
+        messages.error(request, "Could not load the calendar.")
+        template = (
+            "shifts/partials/calendar.html"
+            if request.headers.get("HX-Request")
+            else "shifts/calendar.html"
+        )
+        return render(request, template, empty_calendar_month())
 
 
 @login_required
