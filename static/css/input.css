@@ -15,11 +15,28 @@
   .form-control input:not([type]),
   .form-control select,
   .form-control textarea {
-    @apply mt-1.5 block w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm text-stone-900 shadow-sm outline-none transition placeholder:text-stone-400 focus:border-teal-700 focus:ring-4 focus:ring-teal-700/10;
+    @apply mt-1.5 block min-h-11 w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-base text-stone-900 shadow-sm outline-none transition placeholder:text-stone-400 focus:border-teal-700 focus:ring-4 focus:ring-teal-700/10 sm:text-sm;
   }
 
   .form-control input[type="checkbox"] {
-    @apply size-4 rounded border-stone-300 text-teal-700 accent-teal-700 focus:ring-teal-700/20;
+    @apply size-5 rounded border-stone-300 text-teal-700 accent-teal-700 focus:ring-teal-700/20 sm:size-4;
+  }
+
+  .modal-overlay {
+    @apply fixed inset-0 z-[60] flex items-end justify-center bg-stone-900/40 p-0 sm:items-center sm:p-4;
+  }
+
+  .modal-panel {
+    @apply max-h-[min(92dvh,100%)] w-full max-w-md overflow-y-auto rounded-t-3xl border border-stone-200 bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-xl sm:rounded-2xl sm:p-6;
+  }
+
+  .modal-actions {
+    @apply mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-end;
+  }
+
+  .modal-actions > button,
+  .modal-actions > a {
+    @apply min-h-11 w-full touch-manipulation sm:w-auto;
   }
 
   .form-control ul.errorlist {
@@ -29,6 +46,10 @@
   .form-control .helptext,
   .form-control .helptext a {
     @apply text-xs text-stone-500;
+  }
+
+  .form-control .helptext a {
+    @apply font-medium text-teal-800 underline-offset-2 hover:underline;
   }
 
   .form-control input[aria-invalid="true"],

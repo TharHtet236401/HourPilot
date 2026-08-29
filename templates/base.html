@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>
         {% block title %}Shift Tracker{% endblock %}
     </title>
@@ -15,7 +15,7 @@
     >
     <link href="{% static 'css/output.css' %}" rel="stylesheet">
 </head>
-<body class="min-h-screen bg-stone-50 font-sans text-stone-800 antialiased {% block body_class %}{% endblock %}">
+<body class="min-h-screen overflow-x-hidden bg-stone-50 font-sans text-stone-800 antialiased {% block body_class %}{% endblock %}">
     {% block header %}
     <header class="border-b border-stone-200/80 bg-white/80 backdrop-blur">
         <nav class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
