@@ -57,4 +57,52 @@
   .form-control textarea[aria-invalid="true"] {
     @apply border-red-400 focus:border-red-500 focus:ring-red-500/15;
   }
+
+  .cal-cell-teal { @apply bg-teal-50 text-stone-900 hover:bg-teal-100; }
+  .cal-cell-teal-on { @apply bg-teal-800 text-white shadow-sm hover:bg-teal-800; }
+  .cal-dot-teal { @apply bg-teal-600; }
+  .cal-label-teal { @apply text-teal-800; }
+  .cal-chip-teal { @apply bg-teal-100 text-teal-800; }
+
+  .cal-cell-sky { @apply bg-sky-50 text-stone-900 hover:bg-sky-100; }
+  .cal-cell-sky-on { @apply bg-sky-800 text-white shadow-sm hover:bg-sky-800; }
+  .cal-dot-sky { @apply bg-sky-600; }
+  .cal-label-sky { @apply text-sky-800; }
+  .cal-chip-sky { @apply bg-sky-100 text-sky-800; }
+
+  .cal-cell-violet { @apply bg-violet-50 text-stone-900 hover:bg-violet-100; }
+  .cal-cell-violet-on { @apply bg-violet-800 text-white shadow-sm hover:bg-violet-800; }
+  .cal-dot-violet { @apply bg-violet-600; }
+  .cal-label-violet { @apply text-violet-800; }
+  .cal-chip-violet { @apply bg-violet-100 text-violet-800; }
+
+  .cal-cell-amber { @apply bg-amber-50 text-stone-900 hover:bg-amber-100; }
+  .cal-cell-amber-on { @apply bg-amber-800 text-white shadow-sm hover:bg-amber-800; }
+  .cal-dot-amber { @apply bg-amber-600; }
+  .cal-label-amber { @apply text-amber-800; }
+  .cal-chip-amber { @apply bg-amber-100 text-amber-800; }
+
+  .cal-cell-rose { @apply bg-rose-50 text-stone-900 hover:bg-rose-100; }
+  .cal-cell-rose-on { @apply bg-rose-800 text-white shadow-sm hover:bg-rose-800; }
+  .cal-dot-rose { @apply bg-rose-600; }
+  .cal-label-rose { @apply text-rose-800; }
+  .cal-chip-rose { @apply bg-rose-100 text-rose-800; }
+
+  .cal-cell-lime { @apply bg-lime-50 text-stone-900 hover:bg-lime-100; }
+  .cal-cell-lime-on { @apply bg-lime-800 text-white shadow-sm hover:bg-lime-800; }
+  .cal-dot-lime { @apply bg-lime-600; }
+  .cal-label-lime { @apply text-lime-800; }
+  .cal-chip-lime { @apply bg-lime-100 text-lime-800; }
+
+  .cal-cell-indigo { @apply bg-indigo-50 text-stone-900 hover:bg-indigo-100; }
+  .cal-cell-indigo-on { @apply bg-indigo-800 text-white shadow-sm hover:bg-indigo-800; }
+  .cal-dot-indigo { @apply bg-indigo-600; }
+  .cal-label-indigo { @apply text-indigo-800; }
+  .cal-chip-indigo { @apply bg-indigo-100 text-indigo-800; }
+
+  .cal-cell-orange { @apply bg-orange-50 text-stone-900 hover:bg-orange-100; }
+  .cal-cell-orange-on { @apply bg-orange-800 text-white shadow-sm hover:bg-orange-800; }
+  .cal-dot-orange { @apply bg-orange-600; }
+  .cal-label-orange { @apply text-orange-800; }
+  .cal-chip-orange { @apply bg-orange-100 text-orange-800; }
 }

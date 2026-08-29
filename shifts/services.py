@@ -137,6 +137,17 @@ def _month_bounds(year, month):
     return first, last, prev_year, prev_month, next_year, next_month
 
 
+def unique_workplaces(shifts):
+    workplaces = []
+    seen = set()
+    for shift in shifts:
+        if shift.workplace_id in seen:
+            continue
+        seen.add(shift.workplace_id)
+        workplaces.append(shift.workplace)
+    return workplaces
+
+
 def empty_calendar_month(year=None, month=None):
     today = timezone.localdate()
     year = year or today.year
@@ -157,6 +168,7 @@ def empty_calendar_month(year=None, month=None):
         "next_year": next_year,
         "next_month": next_month,
         "weekday_labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        "workplace_legend": [],
     }
 
 
@@ -187,6 +199,7 @@ def calendar_month(user, year, month, selected=None):
         for day in week:
             day_shifts = by_day.get(day, [])
             day_summary = summarize_shifts(day_shifts)
+            day_workplaces = unique_workplaces(day_shifts)
             days.append(
                 {
                     "date": day,
@@ -194,6 +207,10 @@ def calendar_month(user, year, month, selected=None):
                     "is_today": day == today,
                     "is_selected": selected == day,
                     "shifts": day_shifts,
+                    "workplaces": day_workplaces,
+                    "color_key": (
+                        day_workplaces[0].color_key if len(day_workplaces) == 1 else ""
+                    ),
                     "hours_display": day_summary["hours_display"],
                     "pay": day_summary["pay"],
                     "has_shifts": bool(day_shifts),
@@ -214,4 +231,7 @@ def calendar_month(user, year, month, selected=None):
         "next_year": next_year,
         "next_month": next_month,
         "weekday_labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        "workplace_legend": sorted(
+            unique_workplaces(shifts), key=lambda workplace: workplace.name.lower()
+        ),
     }

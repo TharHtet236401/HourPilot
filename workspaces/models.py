@@ -1,6 +1,9 @@
 from django.db import models
 from django.conf import settings
 
+from .colors import workplace_color_key
+
+
 class Workplace(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -19,6 +22,10 @@ class Workplace(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def color_key(self):
+        return workplace_color_key(self.pk)
 
     def __str__(self):
         return self.name
