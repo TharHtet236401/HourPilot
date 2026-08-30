@@ -218,6 +218,14 @@ def shift_list(request):
 
 def _export_form_context(request, form=None):
     today = timezone.localdate()
+    first_shift = (
+        request.user.shifts.order_by("date").values_list("date", flat=True).first()
+    )
+    last_shift = (
+        request.user.shifts.order_by("-date").values_list("date", flat=True).first()
+    )
+    all_from = first_shift or today
+    all_to = last_shift or today
     if form is None:
         form = ShiftExportForm(
             user=request.user,
@@ -232,6 +240,8 @@ def _export_form_context(request, form=None):
         "week_start": (today - timedelta(days=today.weekday())).isoformat(),
         "month_start": today.replace(day=1).isoformat(),
         "year_start": today.replace(month=1, day=1).isoformat(),
+        "all_from": all_from.isoformat(),
+        "all_to": all_to.isoformat(),
     }
 
 
