@@ -103,6 +103,20 @@
             }
         }
 
+        function closeMenus(except) {
+            document.querySelectorAll("[data-menu]").forEach((menu) => {
+                if (menu === except) {
+                    return;
+                }
+                const panel = menu.querySelector("[data-menu-panel]");
+                const toggle = menu.querySelector("[data-menu-toggle]");
+                if (panel) {
+                    panel.hidden = true;
+                }
+                toggle?.setAttribute("aria-expanded", "false");
+            });
+        }
+
         function isSidebarOpen() {
             return document.getElementById("app-shell")?.classList.contains("is-open");
         }
@@ -136,12 +150,29 @@
 
         document.addEventListener("DOMContentLoaded", () => initToasts());
         document.addEventListener("htmx:afterSwap", () => initToasts());
+        document.addEventListener("htmx:beforeRequest", () => closeMenus());
         document.addEventListener("click", (event) => {
             if (event.target.closest("[data-sidebar-open]")) {
                 setSidebarOpen(true);
             }
             if (event.target.closest("[data-sidebar-close]")) {
                 setSidebarOpen(false);
+            }
+
+            const menuToggle = event.target.closest("[data-menu-toggle]");
+            if (menuToggle) {
+                const menu = menuToggle.closest("[data-menu]");
+                const panel = menu?.querySelector("[data-menu-panel]");
+                if (panel) {
+                    const willOpen = panel.hidden;
+                    closeMenus(willOpen ? menu : null);
+                    panel.hidden = !willOpen;
+                    menuToggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+                }
+                return;
+            }
+            if (!event.target.closest("[data-menu]")) {
+                closeMenus();
             }
 
             const pieButton = event.target.closest("[data-pie-mode]");
@@ -180,6 +211,7 @@
                 setSidebarOpen(false);
                 return;
             }
+            closeMenus();
             closeModal();
         });
         window.addEventListener("resize", () => {
