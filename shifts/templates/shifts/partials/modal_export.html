@@ -1,0 +1,111 @@
+<div
+    class="modal-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="export-modal-title"
+    onclick="if (event.target === this) closeModal()"
+>
+    <div class="modal-panel">
+        <div class="flex items-start justify-between gap-3">
+            <div>
+                <p class="text-xs font-medium uppercase tracking-[0.18em] text-teal-800">Export</p>
+                <h2 id="export-modal-title" class="mt-1 font-serif text-2xl tracking-tight text-stone-900">
+                    Download shifts
+                </h2>
+            </div>
+            <button
+                type="button"
+                onclick="closeModal()"
+                class="rounded-lg p-1 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
+                aria-label="Close"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                    <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                </svg>
+            </button>
+        </div>
+
+        <p class="mt-3 text-sm leading-6 text-stone-500">
+            Download a CSV of your shifts. Leave the dates empty to include everything.
+        </p>
+
+        <form
+            method="get"
+            action="{% url 'shift_export_csv' %}"
+            class="form-control mt-6 space-y-4"
+        >
+            {% if error %}
+                <div class="rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
+                    {{ error }}
+                </div>
+            {% endif %}
+
+            {% if form.non_field_errors %}
+                <div class="rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
+                    {% for err in form.non_field_errors %}
+                        <p>{{ err }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="flex flex-wrap gap-2">
+                <button
+                    type="button"
+                    class="inline-flex min-h-9 items-center rounded-lg bg-stone-100 px-2.5 text-xs font-medium text-stone-700 hover:bg-stone-200"
+                    onclick="document.getElementById('id_date_from').value='{{ week_start }}'; document.getElementById('id_date_to').value='{{ today }}';"
+                >
+                    This week
+                </button>
+                <button
+                    type="button"
+                    class="inline-flex min-h-9 items-center rounded-lg bg-stone-100 px-2.5 text-xs font-medium text-stone-700 hover:bg-stone-200"
+                    onclick="document.getElementById('id_date_from').value='{{ month_start }}'; document.getElementById('id_date_to').value='{{ today }}';"
+                >
+                    This month
+                </button>
+                <button
+                    type="button"
+                    class="inline-flex min-h-9 items-center rounded-lg bg-stone-100 px-2.5 text-xs font-medium text-stone-700 hover:bg-stone-200"
+                    onclick="document.getElementById('id_date_from').value='{{ year_start }}'; document.getElementById('id_date_to').value='{{ today }}';"
+                >
+                    This year
+                </button>
+                <button
+                    type="button"
+                    class="inline-flex min-h-9 items-center rounded-lg bg-stone-100 px-2.5 text-xs font-medium text-stone-700 hover:bg-stone-200"
+                    onclick="document.getElementById('id_date_from').value=''; document.getElementById('id_date_to').value='';"
+                >
+                    All time
+                </button>
+            </div>
+
+            {% for field in form.visible_fields %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="text-sm font-medium text-stone-700">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {% for err in field.errors %}
+                        <p class="mt-1.5 text-sm text-red-600">{{ err }}</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <div class="modal-actions pt-2">
+                <button
+                    type="button"
+                    onclick="closeModal()"
+                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-stone-600 transition hover:bg-stone-100"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    class="rounded-xl bg-teal-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700"
+                >
+                    Download CSV
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

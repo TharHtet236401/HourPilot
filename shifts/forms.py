@@ -94,3 +94,43 @@ class ShiftForm(forms.ModelForm):
                     )
 
         return cleaned_data
+
+
+class ShiftExportForm(forms.Form):
+    workplace = forms.ModelChoiceField(
+        queryset=Workplace.objects.none(),
+        required=False,
+        empty_label="All workplaces",
+    )
+    date_from = forms.DateField(
+        required=False,
+        label="From",
+        widget=forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
+        input_formats=["%Y-%m-%d"],
+    )
+    date_to = forms.DateField(
+        required=False,
+        label="To",
+        widget=forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
+        input_formats=["%Y-%m-%d"],
+    )
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        workplaces = Workplace.objects.filter(user=user).order_by("name")
+        self.fields["workplace"].queryset = workplaces
+
+        if self.is_bound:
+            for name, field in self.fields.items():
+                if self.errors.get(name):
+                    existing = field.widget.attrs.get("class", "")
+                    field.widget.attrs["class"] = f"{existing} border-red-400".strip()
+                    field.widget.attrs["aria-invalid"] = "true"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        date_from = cleaned_data.get("date_from")
+        date_to = cleaned_data.get("date_to")
+        if date_from and date_to and date_from > date_to:
+            self.add_error("date_to", "End date must be on or after the start date.")
+        return cleaned_data

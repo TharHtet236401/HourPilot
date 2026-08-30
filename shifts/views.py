@@ -1,8 +1,9 @@
-from datetime import date
+from datetime import date, timedelta
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, render
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from config.pagination import (
@@ -13,7 +14,8 @@ from config.pagination import (
 )
 from workspaces.models import Workplace
 
-from .forms import ShiftForm
+from .export import export_filename, filtered_shifts, shifts_csv
+from .forms import ShiftExportForm, ShiftForm
 from .models import Shift
 from .services import (
     calendar_month,
@@ -212,6 +214,74 @@ def shift_list(request):
                 "list_target": "#shift-list",
             },
         )
+
+
+def _export_form_context(request, form=None):
+    today = timezone.localdate()
+    if form is None:
+        form = ShiftExportForm(
+            user=request.user,
+            initial={
+                "date_from": today.replace(day=1),
+                "date_to": today,
+            },
+        )
+    return {
+        "form": form,
+        "today": today.isoformat(),
+        "week_start": (today - timedelta(days=today.weekday())).isoformat(),
+        "month_start": today.replace(day=1).isoformat(),
+        "year_start": today.replace(month=1, day=1).isoformat(),
+    }
+
+
+@login_required
+def shift_export_form(request):
+    try:
+        return render(
+            request,
+            "shifts/partials/modal_export.html",
+            _export_form_context(request),
+        )
+    except Exception:
+        return render(
+            request,
+            "shifts/partials/modal_export.html",
+            {
+                **_export_form_context(request),
+                "error": "Could not open the export form.",
+            },
+        )
+
+
+@login_required
+def shift_export_csv(request):
+    try:
+        form = ShiftExportForm(request.GET or None, user=request.user)
+        if not form.is_valid():
+            messages.error(request, "Could not export those shifts. Check the dates.")
+            return redirect("shift_list")
+
+        workplace = form.cleaned_data.get("workplace")
+        date_from = form.cleaned_data.get("date_from")
+        date_to = form.cleaned_data.get("date_to")
+        shifts = filtered_shifts(
+            request.user,
+            workplace=workplace,
+            date_from=date_from,
+            date_to=date_to,
+        )
+        response = HttpResponse(
+            shifts_csv(shifts),
+            content_type="text/csv; charset=utf-8",
+        )
+        response["Content-Disposition"] = (
+            f'attachment; filename="{export_filename(workplace, date_from, date_to)}"'
+        )
+        return response
+    except Exception:
+        messages.error(request, "Could not export your shifts.")
+        return redirect("shift_list")
 
 
 @login_required
