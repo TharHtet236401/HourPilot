@@ -20,6 +20,8 @@ from .services import (
     dashboard_stats,
     empty_calendar_month,
     empty_dashboard_stats,
+    empty_statistics_stats,
+    statistics_stats,
     summarize_shifts,
 )
 
@@ -84,6 +86,40 @@ def home(request):
             template,
             {"stats": empty_dashboard_stats()},
         )
+
+
+def _stats_period(request):
+    period = request.GET.get("period", "month")
+    if period not in {"week", "month", "year", "all"}:
+        return "month"
+    return period
+
+
+@login_required
+def shift_statistics(request):
+    try:
+        workplace = _dashboard_workplace(request)
+        context = {
+            "stats": statistics_stats(
+                request.user,
+                period=_stats_period(request),
+                workplace=workplace,
+            )
+        }
+        template = (
+            "shifts/partials/statistics.html"
+            if request.headers.get("HX-Request")
+            else "shifts/statistics.html"
+        )
+        return render(request, template, context)
+    except Exception:
+        messages.error(request, "Could not load your statistics.")
+        template = (
+            "shifts/partials/statistics.html"
+            if request.headers.get("HX-Request")
+            else "shifts/statistics.html"
+        )
+        return render(request, template, {"stats": empty_statistics_stats()})
 
 
 def _calendar_context(request):

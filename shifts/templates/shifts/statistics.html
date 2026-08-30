@@ -1,0 +1,17 @@
+{% extends "app.html" %}
+
+{% block title %}Statistics | Shift Tracker{% endblock %}
+
+{% block app_content %}
+<div class="px-4 py-6 sm:px-8 sm:py-10">
+    <p class="text-xs font-medium uppercase tracking-[0.18em] text-teal-800">Statistics</p>
+    <h1 class="mt-2 font-serif text-2xl tracking-tight text-stone-900 sm:text-3xl">Hours and pay</h1>
+    <p class="mt-2 max-w-xl text-sm leading-6 text-stone-500">
+        See how your hours and earnings break down over time and by workplace.
+    </p>
+
+    <div id="stats-root" class="mt-6">
+        {% include "shifts/partials/statistics.html" %}
+    </div>
+</div>
+{% endblock %}

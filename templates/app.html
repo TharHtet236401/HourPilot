@@ -73,6 +73,18 @@
                 </svg>
                 Calendar
             </a>
+            <a
+                href="{% url 'shift_statistics' %}"
+                class="flex min-h-11 items-center gap-2.5 rounded-xl px-3 text-sm font-medium transition {% if request.resolver_match.url_name == 'shift_statistics' %}bg-teal-800 text-white shadow-sm{% else %}text-stone-600 hover:bg-stone-100 hover:text-stone-900{% endif %}"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4">
+                    <path d="M12 3.75a.75.75 0 0 0-1.5 0v13.5a.75.75 0 0 0 1.5 0V3.75Z" />
+                    <path d="M16.25 8.5a.75.75 0 0 0-1.5 0v8.75a.75.75 0 0 0 1.5 0V8.5Z" />
+                    <path d="M7.75 10.75a.75.75 0 0 0-1.5 0v6.5a.75.75 0 0 0 1.5 0v-6.5Z" />
+                    <path d="M3.5 13a.75.75 0 0 0-1.5 0v4.25a.75.75 0 0 0 1.5 0V13Z" />
+                </svg>
+                Statistics
+            </a>
         </nav>
 
         <div class="mt-auto flex items-center justify-between gap-2 border-t border-stone-200 px-4 py-4">
