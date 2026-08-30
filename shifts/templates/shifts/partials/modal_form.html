@@ -12,6 +12,11 @@
                 <h2 id="shift-modal-title" class="mt-1 font-serif text-2xl tracking-tight text-stone-900">
                     {% if shift %}Edit shift{% else %}Add shift{% endif %}
                 </h2>
+                {% if copied_from %}
+                    <p class="mt-1 text-sm text-stone-500">
+                        Copied from {{ copied_from.workplace.name }} on {{ copied_from.date|date:"j M" }}.
+                    </p>
+                {% endif %}
             </div>
             <button
                 type="button"
@@ -33,6 +38,18 @@
             class="form-control mt-6 space-y-4"
         >
             {% csrf_token %}
+
+            {% if not shift and last_shift %}
+                <button
+                    type="button"
+                    hx-get="{% url 'shift_create' %}?repeat=1{% if selected_day %}&day={{ selected_day }}{% endif %}"
+                    hx-target="#modal"
+                    hx-swap="innerHTML"
+                    class="text-sm font-medium text-teal-800 hover:underline"
+                >
+                    Copy last shift ({{ last_shift.workplace.name }}, {{ last_shift.start_time }}–{{ last_shift.end_time }})
+                </button>
+            {% endif %}
 
             {% if error %}
                 <div class="rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">

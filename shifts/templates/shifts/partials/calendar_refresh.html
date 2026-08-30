@@ -1,0 +1,6 @@
+<div id="calendar-root" hx-swap-oob="innerHTML">
+    {% include "shifts/partials/calendar.html" %}
+</div>
+<div id="toast-container" hx-swap-oob="innerHTML">
+    {% include "partials/toast.html" with text=message level="success" %}
+</div>

@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from urllib.parse import parse_qs, urlparse
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -32,6 +33,64 @@ def _user_shifts(user):
     return user.shifts.select_related("workplace").order_by("-date", "-start_time")
 
 
+def _last_user_shift(user):
+    return _user_shifts(user).first()
+
+
+def _current_url(request):
+    return request.headers.get("HX-Current-URL") or request.build_absolute_uri()
+
+
+def _request_on_calendar(request):
+    path = urlparse(_current_url(request)).path
+    return "/calendar/" in path or path.rstrip("/").endswith("calendar")
+
+
+def _request_on_shifts(request):
+    path = urlparse(_current_url(request)).path
+    return "/shifts/" in path and "/export" not in path
+
+
+def _shift_defaults(request):
+    initial = {"date": timezone.localdate()}
+    selected_day = request.GET.get("day")
+    if selected_day:
+        try:
+            initial["date"] = date.fromisoformat(selected_day)
+        except ValueError:
+            pass
+
+    source = None
+    copy_id = request.GET.get("copy")
+    if copy_id:
+        source = (
+            request.user.shifts.select_related("workplace").filter(pk=copy_id).first()
+        )
+    elif request.GET.get("repeat"):
+        source = _last_user_shift(request.user)
+
+    if source:
+        initial["start_time"] = source.start_time
+        initial["end_time"] = source.end_time
+        initial["break_minutes"] = source.break_minutes
+        if source.workplace.is_active:
+            initial["workplace"] = source.workplace
+
+    return initial, source
+
+
+def _create_form_context(request, form, copied_from=None, extra=None):
+    context = {
+        "form": form,
+        "last_shift": _last_user_shift(request.user),
+        "copied_from": copied_from,
+        "selected_day": request.GET.get("day", ""),
+    }
+    if extra:
+        context.update(extra)
+    return context
+
+
 def _shift_list_context(request, page=None):
     page_obj = paginate(
         _user_shifts(request.user),
@@ -43,6 +102,7 @@ def _shift_list_context(request, page=None):
         "page_obj": page_obj,
         "page_url_name": "shift_list",
         "list_target": "#shift-list",
+        "last_shift": _last_user_shift(request.user),
     }
 
 
@@ -52,6 +112,28 @@ def _shift_form_success(request, message, page=None):
     response = render(request, "shifts/partials/list_refresh.html", context)
     response["HX-Push-Url"] = list_page_url("shift_list", context["page_obj"].number)
     return response
+
+
+def _calendar_form_success(request, message):
+    context = _calendar_context(request)
+    context["message"] = message
+    return render(request, "shifts/partials/calendar_refresh.html", context)
+
+
+def _toast_form_success(request, message):
+    return render(
+        request,
+        "shifts/partials/toast_refresh.html",
+        {"message": message},
+    )
+
+
+def _after_shift_save(request, message, page=None):
+    if _request_on_calendar(request):
+        return _calendar_form_success(request, message)
+    if _request_on_shifts(request):
+        return _shift_form_success(request, message, page=page)
+    return _toast_form_success(request, message)
 
 
 def _dashboard_workplace(request):
@@ -126,9 +208,15 @@ def shift_statistics(request):
 
 def _calendar_context(request):
     today = timezone.localdate()
+    year = request.GET.get("year")
+    month = request.GET.get("month")
+    if year is None or month is None:
+        query = parse_qs(urlparse(_current_url(request)).query)
+        year = year or (query.get("year") or [None])[0]
+        month = month or (query.get("month") or [None])[0]
     try:
-        year = int(request.GET.get("year", today.year))
-        month = int(request.GET.get("month", today.month))
+        year = int(year or today.year)
+        month = int(month or today.month)
         date(year, month, 1)
     except (TypeError, ValueError):
         year, month = today.year, today.month
@@ -172,6 +260,7 @@ def calendar_day(request):
                 "selected": selected,
                 "selected_shifts": shifts,
                 "day_summary": summarize_shifts(shifts),
+                "last_shift": _last_user_shift(request.user),
             },
         )
     except Exception:
@@ -315,24 +404,30 @@ def shift_create(request):
                 shift.user = request.user
                 shift.hourly_rate_at_time = shift.workplace.hourly_rate
                 shift.save()
-                return _shift_form_success(request, "Shift added.", page=1)
-        else:
-            form = ShiftForm(user=request.user)
+                return _after_shift_save(request, "Shift added.", page=1)
+            return render(
+                request,
+                "shifts/partials/modal_form.html",
+                _create_form_context(request, form),
+            )
 
+        initial, copied_from = _shift_defaults(request)
+        form = ShiftForm(user=request.user, initial=initial)
         return render(
             request,
             "shifts/partials/modal_form.html",
-            {"form": form},
+            _create_form_context(request, form, copied_from=copied_from),
         )
     except Exception:
         form = ShiftForm(request.POST or None, user=request.user)
         return render(
             request,
             "shifts/partials/modal_form.html",
-            {
-                "form": form,
-                "error": "Could not save this shift.",
-            },
+            _create_form_context(
+                request,
+                form,
+                extra={"error": "Could not save this shift."},
+            ),
         )
 
 
@@ -351,7 +446,7 @@ def shift_update(request, pk):
                 shift = form.save(commit=False)
                 shift.hourly_rate_at_time = shift.workplace.hourly_rate
                 shift.save()
-                return _shift_form_success(request, "Shift updated.")
+                return _after_shift_save(request, "Shift updated.")
         else:
             form = ShiftForm(user=request.user, instance=shift)
 
@@ -388,7 +483,7 @@ def shift_delete(request, pk):
     try:
         if request.method == "POST":
             shift.delete()
-            return _shift_form_success(request, "Shift deleted.")
+            return _after_shift_save(request, "Shift deleted.")
 
         return render(
             request,
