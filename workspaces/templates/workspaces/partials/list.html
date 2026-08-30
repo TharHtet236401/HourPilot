@@ -10,47 +10,9 @@
                         {% else %}
                             <span class="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-medium text-stone-500">Inactive</span>
                         {% endif %}
-                        <div class="relative" data-menu>
-                            <button
-                                type="button"
-                                data-menu-toggle
-                                aria-expanded="false"
-                                aria-haspopup="menu"
-                                aria-label="More actions for {{ workplace.name }}"
-                                class="inline-flex size-11 items-center justify-center rounded-xl text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
-                                    <path d="M10 3a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM10 8.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM11.5 15.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0Z" />
-                                </svg>
-                            </button>
-                            <div
-                                data-menu-panel
-                                role="menu"
-                                hidden
-                                class="absolute right-0 z-30 mt-1 w-40 overflow-hidden rounded-xl border border-stone-200 bg-white py-1 shadow-lg"
-                            >
-                                <button
-                                    type="button"
-                                    role="menuitem"
-                                    hx-get="{% url 'workplace_update' workplace.pk %}"
-                                    hx-target="#modal"
-                                    hx-swap="innerHTML"
-                                    class="flex min-h-11 w-full items-center px-3 text-left text-sm font-medium text-stone-700 transition hover:bg-stone-50"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    type="button"
-                                    role="menuitem"
-                                    hx-get="{% url 'workplace_delete' workplace.pk %}"
-                                    hx-target="#modal"
-                                    hx-swap="innerHTML"
-                                    class="flex min-h-11 w-full items-center px-3 text-left text-sm font-medium text-red-700 transition hover:bg-red-50"
-                                >
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
+                        {% url 'workplace_update' workplace.pk as workplace_edit_url %}
+                        {% url 'workplace_delete' workplace.pk as workplace_delete_url %}
+                        {% include "partials/action_menu.html" with menu_label="More actions for "|add:workplace.name edit_url=workplace_edit_url delete_url=workplace_delete_url %}
                     </div>
                 </div>
                 <p class="mt-3 text-2xl font-semibold tracking-tight text-stone-900">
