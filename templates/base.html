@@ -103,6 +103,40 @@
             }
         }
 
+        function setExportRangeActive(root, key) {
+            root.querySelectorAll("[data-export-range]").forEach((button) => {
+                const active = button.dataset.exportRange === key;
+                button.setAttribute("aria-pressed", active ? "true" : "false");
+                button.classList.toggle("bg-teal-800", active);
+                button.classList.toggle("text-white", active);
+                button.classList.toggle("shadow-sm", active);
+                button.classList.toggle("bg-stone-100", !active);
+                button.classList.toggle("text-stone-700", !active);
+                button.classList.toggle("hover:bg-stone-200", !active);
+            });
+        }
+
+        function matchExportRange(form) {
+            if (!form) {
+                return;
+            }
+            const from = form.querySelector("[name=date_from]")?.value || "";
+            const to = form.querySelector("[name=date_to]")?.value || "";
+            let matched = "";
+            form.querySelectorAll("[data-export-range]").forEach((button) => {
+                if ((button.dataset.from || "") === from && (button.dataset.to || "") === to) {
+                    matched = button.dataset.exportRange;
+                }
+            });
+            setExportRangeActive(form, matched);
+        }
+
+        function initExportRange(root = document) {
+            root.querySelectorAll("[data-export-ranges]").forEach((group) => {
+                matchExportRange(group.closest("form"));
+            });
+        }
+
         function closeMenus(except) {
             document.querySelectorAll("[data-menu]").forEach((menu) => {
                 if (menu === except) {
@@ -148,8 +182,14 @@
             dismissToast(closeButton.closest("[data-toast]"));
         });
 
-        document.addEventListener("DOMContentLoaded", () => initToasts());
-        document.addEventListener("htmx:afterSwap", () => initToasts());
+        document.addEventListener("DOMContentLoaded", () => {
+            initToasts();
+            initExportRange();
+        });
+        document.addEventListener("htmx:afterSwap", () => {
+            initToasts();
+            initExportRange();
+        });
         document.addEventListener("htmx:beforeRequest", () => closeMenus());
         document.addEventListener("click", (event) => {
             if (event.target.closest("[data-sidebar-open]")) {
@@ -173,6 +213,21 @@
             }
             if (!event.target.closest("[data-menu]")) {
                 closeMenus();
+            }
+
+            const rangeButton = event.target.closest("[data-export-range]");
+            if (rangeButton) {
+                const form = rangeButton.closest("form");
+                const fromInput = form?.querySelector("[name=date_from]");
+                const toInput = form?.querySelector("[name=date_to]");
+                if (fromInput) {
+                    fromInput.value = rangeButton.dataset.from || "";
+                }
+                if (toInput) {
+                    toInput.value = rangeButton.dataset.to || "";
+                }
+                setExportRangeActive(form, rangeButton.dataset.exportRange);
+                return;
             }
 
             const pieButton = event.target.closest("[data-pie-mode]");
@@ -202,6 +257,15 @@
             root.querySelectorAll("[data-pie-hours]").forEach((el) => {
                 el.classList.toggle("hidden", mode !== "hours");
             });
+        });
+        document.addEventListener("change", (event) => {
+            if (!event.target.matches("[name=date_from], [name=date_to]")) {
+                return;
+            }
+            const form = event.target.closest("form");
+            if (form?.querySelector("[data-export-range]")) {
+                matchExportRange(form);
+            }
         });
         document.addEventListener("keydown", (event) => {
             if (event.key !== "Escape") {

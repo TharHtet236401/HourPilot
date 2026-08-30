@@ -48,32 +48,44 @@
                 </div>
             {% endif %}
 
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-2" data-export-ranges>
                 <button
                     type="button"
+                    data-export-range="week"
+                    data-from="{{ week_start }}"
+                    data-to="{{ today }}"
+                    aria-pressed="false"
                     class="inline-flex min-h-9 items-center rounded-lg bg-stone-100 px-2.5 text-xs font-medium text-stone-700 hover:bg-stone-200"
-                    onclick="document.getElementById('id_date_from').value='{{ week_start }}'; document.getElementById('id_date_to').value='{{ today }}';"
                 >
                     This week
                 </button>
                 <button
                     type="button"
-                    class="inline-flex min-h-9 items-center rounded-lg bg-stone-100 px-2.5 text-xs font-medium text-stone-700 hover:bg-stone-200"
-                    onclick="document.getElementById('id_date_from').value='{{ month_start }}'; document.getElementById('id_date_to').value='{{ today }}';"
+                    data-export-range="month"
+                    data-from="{{ month_start }}"
+                    data-to="{{ today }}"
+                    aria-pressed="true"
+                    class="inline-flex min-h-9 items-center rounded-lg bg-teal-800 px-2.5 text-xs font-medium text-white shadow-sm"
                 >
                     This month
                 </button>
                 <button
                     type="button"
+                    data-export-range="year"
+                    data-from="{{ year_start }}"
+                    data-to="{{ today }}"
+                    aria-pressed="false"
                     class="inline-flex min-h-9 items-center rounded-lg bg-stone-100 px-2.5 text-xs font-medium text-stone-700 hover:bg-stone-200"
-                    onclick="document.getElementById('id_date_from').value='{{ year_start }}'; document.getElementById('id_date_to').value='{{ today }}';"
                 >
                     This year
                 </button>
                 <button
                     type="button"
+                    data-export-range="all"
+                    data-from=""
+                    data-to=""
+                    aria-pressed="false"
                     class="inline-flex min-h-9 items-center rounded-lg bg-stone-100 px-2.5 text-xs font-medium text-stone-700 hover:bg-stone-200"
-                    onclick="document.getElementById('id_date_from').value=''; document.getElementById('id_date_to').value='';"
                 >
                     All time
                 </button>
