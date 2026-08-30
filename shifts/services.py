@@ -1,11 +1,12 @@
 import calendar
+import math
 from collections import defaultdict
 from datetime import date, timedelta
 from decimal import Decimal
 
 from django.utils import timezone
 
-from workspaces.colors import workplace_color_key
+from workspaces.colors import workplace_color_hex, workplace_color_key
 
 
 def format_minutes(minutes):
@@ -71,6 +72,70 @@ def workplace_breakdown(shifts):
 
     results.sort(key=lambda item: item["pay"], reverse=True)
     return results
+
+
+def _polar(cx, cy, radius, degrees):
+    radians = math.radians(degrees)
+    return cx + radius * math.cos(radians), cy + radius * math.sin(radians)
+
+
+def _slice_path(start_deg, sweep, cx=50, cy=50, radius=40):
+    end_deg = start_deg + sweep
+    start_x, start_y = _polar(cx, cy, radius, start_deg)
+    end_x, end_y = _polar(cx, cy, radius, end_deg)
+    large_arc = 1 if sweep > 180 else 0
+    return (
+        f"M {cx:.2f} {cy:.2f} L {start_x:.2f} {start_y:.2f} "
+        f"A {radius} {radius} 0 {large_arc} 1 {end_x:.2f} {end_y:.2f} Z"
+    )
+
+
+def workplace_pies(breakdown):
+    pay_total = sum((row["pay"] for row in breakdown), Decimal("0.00"))
+    minutes_total = sum(row["minutes"] for row in breakdown)
+    return {
+        "pay": _pie_slices(breakdown, "pay", pay_total, money=True),
+        "hours": _pie_slices(breakdown, "minutes", minutes_total, money=False),
+    }
+
+
+def _pie_slices(breakdown, value_key, total, money):
+    slices = []
+    if total <= 0:
+        return slices
+
+    usable = [row for row in breakdown if row[value_key] > 0]
+    cursor = -90.0
+    remaining_angle = 360.0
+    total_value = float(total)
+
+    for index, row in enumerate(usable):
+        value = float(row[value_key])
+        if index == len(usable) - 1:
+            sweep = remaining_angle
+        else:
+            sweep = value / total_value * 360.0
+            remaining_angle -= sweep
+
+        percent = 0
+        if total_value > 0:
+            percent = int(Decimal(value / total_value * 100).quantize(Decimal("1")))
+
+        full = sweep >= 359.99
+        slices.append(
+            {
+                "name": row["name"],
+                "color_key": row["color_key"],
+                "hex": workplace_color_hex(row["id"]),
+                "percent": percent,
+                "full": full,
+                "path": None if full else _slice_path(cursor, max(sweep, 0.01)),
+                "value_display": f"£{row['pay']}" if money else row["hours_display"],
+            }
+        )
+        cursor += sweep
+
+    return slices
 
 
 def empty_dashboard_stats():
@@ -181,10 +246,51 @@ def _pay_change(current, previous):
     return {"percent": percent, "up": percent >= 0}
 
 
-def _bar_percent(pay, max_pay):
-    if max_pay <= 0 or pay <= 0:
+def _nice_axis_max(max_pay):
+    max_pay = Decimal(max_pay or 0)
+    if max_pay <= 0:
+        return Decimal("10.00")
+
+    value = float(max_pay)
+    magnitude = 10 ** math.floor(math.log10(value))
+    fraction = value / magnitude
+    if fraction <= 1:
+        nice = 1
+    elif fraction <= 2:
+        nice = 2
+    elif fraction <= 2.5:
+        nice = 2.5
+    elif fraction <= 5:
+        nice = 5
+    else:
+        nice = 10
+    return Decimal(str(nice * magnitude)).quantize(Decimal("0.01"))
+
+
+def _format_axis_pay(amount):
+    amount = Decimal(amount).quantize(Decimal("0.01"))
+    if amount == amount.to_integral_value():
+        return f"£{int(amount)}"
+    return f"£{amount}"
+
+
+def _timeline_axis(axis_max):
+    ticks = []
+    for step in (4, 3, 2, 1, 0):
+        amount = (axis_max * Decimal(step) / Decimal(4)).quantize(Decimal("0.01"))
+        ticks.append(
+            {
+                "label": _format_axis_pay(amount),
+                "percent": step * 25,
+            }
+        )
+    return ticks
+
+
+def _bar_percent(pay, axis_max):
+    if axis_max <= 0 or pay <= 0:
         return 0
-    return max(8, int((pay / max_pay) * 100))
+    return int((pay / axis_max * 100).quantize(Decimal("1")))
 
 
 def _day_highlights(shifts):
@@ -271,9 +377,10 @@ def _timeline_points(shifts, period, today):
             )
 
     max_pay = max((point["pay"] for point in points), default=Decimal("0.00"))
+    axis_max = _nice_axis_max(max_pay)
     for point in points:
-        point["percent"] = _bar_percent(point["pay"], max_pay)
-    return points
+        point["percent"] = _bar_percent(point["pay"], axis_max)
+    return points, _timeline_axis(axis_max)
 
 
 def empty_statistics_stats():
@@ -290,7 +397,9 @@ def empty_statistics_stats():
         "average_rate": Decimal("0.00"),
         "average_shift": format_minutes(0),
         "by_workplace": [],
+        "pie": {"pay": [], "hours": []},
         "timeline": [],
+        "timeline_axis": [],
         "highlights": {"busiest_day": None, "best_pay_day": None},
         "workplaces": [],
         "selected_workplace": None,
@@ -334,10 +443,20 @@ def statistics_stats(user, period="month", workplace=None):
             row["share"] = int((row["pay"] / summary["pay"] * 100).quantize(Decimal("1")))
         else:
             row["share"] = 0
+        if summary["minutes"] > 0:
+            row["hour_share"] = int(
+                (Decimal(row["minutes"]) / Decimal(summary["minutes"]) * 100).quantize(
+                    Decimal("1")
+                )
+            )
+        else:
+            row["hour_share"] = 0
 
     average_shift = format_minutes(0)
     if summary["count"]:
         average_shift = format_minutes(summary["minutes"] // summary["count"])
+
+    timeline, timeline_axis = _timeline_points(period_shifts, period, today)
 
     return {
         "has_shifts": bool(period_shifts),
@@ -351,7 +470,9 @@ def statistics_stats(user, period="month", workplace=None):
         "average_rate": _average_rate(summary),
         "average_shift": average_shift,
         "by_workplace": breakdown,
-        "timeline": _timeline_points(period_shifts, period, today),
+        "pie": workplace_pies(breakdown),
+        "timeline": timeline,
+        "timeline_axis": timeline_axis,
         "highlights": _day_highlights(period_shifts),
         "workplaces": list(user.workplaces.order_by("name")),
         "selected_workplace": workplace,

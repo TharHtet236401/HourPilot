@@ -143,6 +143,34 @@
             if (event.target.closest("[data-sidebar-close]")) {
                 setSidebarOpen(false);
             }
+
+            const pieButton = event.target.closest("[data-pie-mode]");
+            if (!pieButton) {
+                return;
+            }
+            const root = pieButton.closest("[data-pie-root]");
+            if (!root) {
+                return;
+            }
+            const mode = pieButton.dataset.pieMode;
+            root.querySelectorAll("[data-pie-mode]").forEach((button) => {
+                const active = button.dataset.pieMode === mode;
+                button.setAttribute("aria-pressed", active ? "true" : "false");
+                button.classList.toggle("bg-teal-800", active);
+                button.classList.toggle("text-white", active);
+                button.classList.toggle("shadow-sm", active);
+                button.classList.toggle("bg-stone-100", !active);
+                button.classList.toggle("text-stone-700", !active);
+            });
+            root.querySelectorAll("[data-pie-panel]").forEach((panel) => {
+                panel.classList.toggle("hidden", panel.dataset.piePanel !== mode);
+            });
+            root.querySelectorAll("[data-pie-pay]").forEach((el) => {
+                el.classList.toggle("hidden", mode !== "pay");
+            });
+            root.querySelectorAll("[data-pie-hours]").forEach((el) => {
+                el.classList.toggle("hidden", mode !== "hours");
+            });
         });
         document.addEventListener("keydown", (event) => {
             if (event.key !== "Escape") {

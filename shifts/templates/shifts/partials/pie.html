@@ -1,0 +1,16 @@
+<div class="relative mx-auto size-48 sm:size-52">
+    <svg viewBox="0 0 100 100" class="size-full" role="img" aria-label="{{ aria_label }}">
+        {% for slice in slices %}
+            {% if slice.full %}
+                <circle cx="50" cy="50" r="40" fill="{{ slice.hex }}"></circle>
+            {% else %}
+                <path d="{{ slice.path }}" fill="{{ slice.hex }}"></path>
+            {% endif %}
+        {% endfor %}
+        <circle cx="50" cy="50" r="24" fill="white"></circle>
+    </svg>
+    <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+        <p class="font-serif text-lg tracking-tight text-stone-900">{% if center_kind == "pay" %}£{% endif %}{{ center_value }}</p>
+        <p class="text-[11px] text-stone-400">{{ center_label }}</p>
+    </div>
+</div>
