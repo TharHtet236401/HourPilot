@@ -8,9 +8,7 @@ class WorkplaceForm(forms.ModelForm):
         model = Workplace
         fields = ["name", "hourly_rate", "is_active"]
         widgets = {
-            "name": forms.TextInput(
-                attrs={"placeholder": "Tesco, cafe, warehouse..."}
-            ),
+            "name": forms.TextInput(attrs={"placeholder": "Tesco, cafe, warehouse..."}),
             "hourly_rate": forms.NumberInput(
                 attrs={
                     "step": "0.01",

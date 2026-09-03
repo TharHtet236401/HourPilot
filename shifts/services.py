@@ -119,7 +119,7 @@ def _pie_slices(breakdown, value_key, total, money):
 
         percent = 0
         if total_value > 0:
-            percent = int(Decimal(value / total_value * 100).quantize(Decimal("1")))
+            percent = int(Decimal(value / total_value * 100).quantize(Decimal(1)))
 
         full = sweep >= 359.99
         slices.append(
@@ -170,7 +170,7 @@ def dashboard_stats(user, workplace=None):
     month_shifts = [shift for shift in shifts if shift.date >= month_start]
 
     all_time = summarize_shifts(shifts)
-    hours = Decimal(all_time["minutes"]) / Decimal("60")
+    hours = Decimal(all_time["minutes"]) / Decimal(60)
     average_rate = Decimal("0.00")
     if hours > 0:
         average_rate = (all_time["pay"] / hours).quantize(Decimal("0.01"))
@@ -198,7 +198,7 @@ STAT_PERIODS = (
 
 
 def _average_rate(summary):
-    hours = Decimal(summary["minutes"]) / Decimal("60")
+    hours = Decimal(summary["minutes"]) / Decimal(60)
     if hours <= 0:
         return Decimal("0.00")
     return (summary["pay"] / hours).quantize(Decimal("0.01"))
@@ -241,7 +241,7 @@ def _pay_change(current, previous):
     if previous["pay"] <= 0:
         return None
     percent = ((current["pay"] - previous["pay"]) / previous["pay"] * 100).quantize(
-        Decimal("1")
+        Decimal(1)
     )
     return {"percent": percent, "up": percent >= 0}
 
@@ -290,7 +290,7 @@ def _timeline_axis(axis_max):
 def _bar_percent(pay, axis_max):
     if axis_max <= 0 or pay <= 0:
         return 0
-    return int((pay / axis_max * 100).quantize(Decimal("1")))
+    return int((pay / axis_max * 100).quantize(Decimal(1)))
 
 
 def _day_highlights(shifts):
@@ -413,9 +413,7 @@ def statistics_stats(user, period="month", workplace=None):
 
     today = timezone.localdate()
     start, end, previous_start, previous_end = _period_bounds(period, today)
-    period_label = next(
-        item["label"] for item in STAT_PERIODS if item["key"] == period
-    )
+    period_label = next(item["label"] for item in STAT_PERIODS if item["key"] == period)
 
     shifts_query = user.shifts.select_related("workplace")
     if workplace:
@@ -430,9 +428,7 @@ def statistics_stats(user, period="month", workplace=None):
     previous_shifts = []
     if previous_start and previous_end:
         previous_shifts = [
-            shift
-            for shift in shifts
-            if previous_start <= shift.date <= previous_end
+            shift for shift in shifts if previous_start <= shift.date <= previous_end
         ]
 
     summary = summarize_shifts(period_shifts)
@@ -440,13 +436,13 @@ def statistics_stats(user, period="month", workplace=None):
     breakdown = workplace_breakdown(period_shifts)
     for row in breakdown:
         if summary["pay"] > 0:
-            row["share"] = int((row["pay"] / summary["pay"] * 100).quantize(Decimal("1")))
+            row["share"] = int((row["pay"] / summary["pay"] * 100).quantize(Decimal(1)))
         else:
             row["share"] = 0
         if summary["minutes"] > 0:
             row["hour_share"] = int(
                 (Decimal(row["minutes"]) / Decimal(summary["minutes"]) * 100).quantize(
-                    Decimal("1")
+                    Decimal(1)
                 )
             )
         else:
@@ -520,7 +516,7 @@ def empty_calendar_month(year=None, month=None):
     today = timezone.localdate()
     year = year or today.year
     month = month or today.month
-    first, last, prev_year, prev_month, next_year, next_month = _month_bounds(
+    first, _last, prev_year, prev_month, next_year, next_month = _month_bounds(
         year, month
     )
     return {

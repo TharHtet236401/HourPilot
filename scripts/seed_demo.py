@@ -20,7 +20,7 @@ from scripts.django_setup import setup
 
 setup()
 
-from scripts.seed import (  # noqa: E402
+from scripts.seed import (
     DEMO_EMAIL,
     DEMO_PASSWORD,
     SeedError,

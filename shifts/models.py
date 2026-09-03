@@ -1,5 +1,3 @@
-from django.db import models
-
 # Create your models here.
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -62,14 +60,12 @@ class Shift(models.Model):
         if end <= start:
             end += timedelta(days=1)
 
-        total_minutes = int(
-            (end - start).total_seconds() / 60
-        )
+        total_minutes = int((end - start).total_seconds() / 60)
 
         return total_minutes - self.break_minutes
 
     def duration_hours(self):
-        return Decimal(self.duration_minutes()) / Decimal("60")
+        return Decimal(self.duration_minutes()) / Decimal(60)
 
     def duration_display(self):
         minutes = max(self.duration_minutes(), 0)
@@ -82,7 +78,6 @@ class Shift(models.Model):
         return f"{remaining}m"
 
     def estimated_earnings(self):
-        return (
-            self.duration_hours()
-            * self.hourly_rate_at_time
-        ).quantize(Decimal("0.01"))
+        return (self.duration_hours() * self.hourly_rate_at_time).quantize(
+            Decimal("0.01")
+        )

@@ -1,7 +1,8 @@
-from datetime import date, datetime
+from datetime import datetime
 
 from django import forms
 from django.db.models import Q
+from django.utils import timezone
 
 from workspaces.models import Workplace
 
@@ -83,8 +84,9 @@ class ShiftForm(forms.ModelForm):
                     "End time must be after start time. If the shift went past midnight, split it into two shifts.",
                 )
             elif break_minutes:
-                start_dt = datetime.combine(date.today(), start_time)
-                end_dt = datetime.combine(date.today(), end_time)
+                shift_day = timezone.localdate()
+                start_dt = datetime.combine(shift_day, start_time)
+                end_dt = datetime.combine(shift_day, end_time)
                 duration_minutes = int((end_dt - start_dt).total_seconds() / 60)
 
                 if break_minutes >= duration_minutes:

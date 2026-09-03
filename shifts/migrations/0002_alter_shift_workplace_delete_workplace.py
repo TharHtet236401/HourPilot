@@ -5,19 +5,22 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('shifts', '0001_initial'),
-        ('workspaces', '0001_initial'),
+        ("shifts", "0001_initial"),
+        ("workspaces", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='shift',
-            name='workplace',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='shifts', to='workspaces.workplace'),
+            model_name="shift",
+            name="workplace",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="shifts",
+                to="workspaces.workplace",
+            ),
         ),
         migrations.DeleteModel(
-            name='Workplace',
+            name="Workplace",
         ),
     ]

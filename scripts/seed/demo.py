@@ -66,9 +66,14 @@ def seed_demo(user, reset=False):
     start = today - timedelta(days=70)
     created_shifts = 0
 
-    for offset, workplace_name, start_time, end_time, break_minutes, notes in (
-        SHIFT_PATTERNS
-    ):
+    for (
+        offset,
+        workplace_name,
+        start_time,
+        end_time,
+        break_minutes,
+        notes,
+    ) in SHIFT_PATTERNS:
         shift_date = start + timedelta(days=offset)
         if shift_date > today:
             continue
