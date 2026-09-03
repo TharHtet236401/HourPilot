@@ -1,6 +1,6 @@
 # Scripts
 
-Local helper scripts. Run them from the project root with `uv`.
+Local helper scripts for [HourPilot](../README.md). Run them from the project root with `uv`.
 
 ## Seed dummy data
 
@@ -22,7 +22,7 @@ uv run python scripts/seed_demo.py --reset
 Seed a specific account (the user must already exist):
 
 ```bash
-uv run python scripts/seed_demo.py --email you@example.comu
+uv run python scripts/seed_demo.py --email you@example.com
 uv run python scripts/seed_demo.py --email you@example.com --reset
 ```
 
