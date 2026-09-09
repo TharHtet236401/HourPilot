@@ -138,6 +138,50 @@
             });
         }
 
+        function resetMenuPanel(panel) {
+            panel.style.position = "";
+            panel.style.top = "";
+            panel.style.right = "";
+            panel.style.bottom = "";
+            panel.style.left = "";
+        }
+
+        function positionMenuPanel(panel, toggle) {
+            const rect = toggle.getBoundingClientRect();
+            const width = panel.offsetWidth || 160;
+            const left = Math.min(
+                Math.max(8, rect.right - width),
+                window.innerWidth - width - 8
+            );
+            panel.style.position = "fixed";
+            panel.style.left = `${left}px`;
+            panel.style.right = "auto";
+            if (window.innerHeight - rect.bottom < 148) {
+                panel.style.top = "auto";
+                panel.style.bottom = `${Math.max(8, window.innerHeight - rect.top + 4)}px`;
+            } else {
+                panel.style.top = `${rect.bottom + 4}px`;
+                panel.style.bottom = "auto";
+            }
+        }
+
+        function toggleActionMenu(toggle) {
+            const menu = toggle.closest("[data-menu]");
+            const panel = menu?.querySelector("[data-menu-panel]");
+            if (!panel) {
+                return;
+            }
+            const willOpen = panel.hidden;
+            closeMenus(willOpen ? menu : null);
+            panel.hidden = !willOpen;
+            toggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+            if (willOpen) {
+                positionMenuPanel(panel, toggle);
+            } else {
+                resetMenuPanel(panel);
+            }
+        }
+
         function closeMenus(except) {
             document.querySelectorAll("[data-menu]").forEach((menu) => {
                 if (menu === except) {
@@ -147,6 +191,7 @@
                 const toggle = menu.querySelector("[data-menu-toggle]");
                 if (panel) {
                     panel.hidden = true;
+                    resetMenuPanel(panel);
                 }
                 toggle?.setAttribute("aria-expanded", "false");
             });
@@ -201,7 +246,22 @@
             initExportRange();
             syncBodyScrollLock();
         });
-        document.addEventListener("htmx:beforeRequest", () => closeMenus());
+        document.addEventListener("htmx:beforeRequest", (event) => {
+            if (event.target.closest("[data-menu-toggle]")) {
+                return;
+            }
+            closeMenus();
+        });
+        document.addEventListener("click", (event) => {
+            const menuToggle = event.target.closest("[data-menu-toggle]");
+            if (!menuToggle) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            toggleActionMenu(menuToggle);
+        }, true);
         document.addEventListener("click", (event) => {
             if (event.target.closest("[data-sidebar-open]")) {
                 setSidebarOpen(true);
@@ -210,27 +270,6 @@
                 setSidebarOpen(false);
             }
 
-            const menuToggle = event.target.closest("[data-menu-toggle]");
-            if (menuToggle) {
-                const menu = menuToggle.closest("[data-menu]");
-                const panel = menu?.querySelector("[data-menu-panel]");
-                if (panel) {
-                    const willOpen = panel.hidden;
-                    closeMenus(willOpen ? menu : null);
-                    panel.hidden = !willOpen;
-                    menuToggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
-                    panel.classList.remove("bottom-full", "mb-1");
-                    panel.classList.add("mt-1");
-                    if (willOpen) {
-                        const space = window.innerHeight - menuToggle.getBoundingClientRect().bottom;
-                        if (space < 148) {
-                            panel.classList.remove("mt-1");
-                            panel.classList.add("bottom-full", "mb-1");
-                        }
-                    }
-                }
-                return;
-            }
             if (!event.target.closest("[data-menu]")) {
                 closeMenus();
             }
@@ -299,10 +338,12 @@
             closeModal();
         });
         window.addEventListener("resize", () => {
+            closeMenus();
             if (isWideLayout() && isSidebarOpen()) {
                 setSidebarOpen(false);
             }
         });
+        window.addEventListener("scroll", () => closeMenus(), true);
     </script>
 </body>
 </html>

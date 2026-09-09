@@ -2,7 +2,7 @@
     <ul class="grid gap-2 sm:grid-cols-2 sm:gap-4">
         {% for workplace in workplaces %}
             <li
-                class="relative cursor-pointer rounded-2xl border border-stone-200/80 bg-white px-3.5 py-3 shadow-sm transition hover:border-stone-300 hover:bg-stone-50/70 sm:p-5"
+                class="relative cursor-pointer overflow-visible rounded-2xl border border-stone-200/80 bg-white px-3.5 py-3 shadow-sm transition hover:border-stone-300 hover:bg-stone-50/70 sm:p-5"
                 hx-get="{% url 'workplace_detail' workplace.pk %}"
                 hx-target="#modal"
                 hx-swap="innerHTML"
