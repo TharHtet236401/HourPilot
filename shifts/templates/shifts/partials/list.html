@@ -1,8 +1,8 @@
 {% if shifts %}
-    <ul class="divide-y divide-stone-100 overflow-hidden rounded-2xl border border-stone-200/80 bg-white shadow-sm md:hidden">
+    <ul class="divide-y divide-stone-100 overflow-visible rounded-2xl border border-stone-200/80 bg-white shadow-sm lg:hidden">
         {% for shift in shifts %}
             <li
-                class="relative cursor-pointer px-3.5 py-3 transition hover:bg-stone-50"
+                class="relative cursor-pointer px-3.5 py-3 transition hover:bg-stone-50 {% if forloop.first %}rounded-t-2xl{% endif %} {% if forloop.last %}rounded-b-2xl{% endif %}"
                 hx-get="{% url 'shift_detail' shift.pk %}"
                 hx-target="#modal"
                 hx-swap="innerHTML"
@@ -17,7 +17,7 @@
                         </p>
                     </div>
                     <div class="flex shrink-0 items-center gap-1">
-                        <p class="text-sm font-semibold text-stone-900">
+                        <p class="text-sm font-semibold tabular-nums text-stone-900">
                             £{{ shift.estimated_earnings }}
                         </p>
                         {% url 'shift_update' shift.pk as shift_edit_url %}
@@ -29,7 +29,7 @@
         {% endfor %}
     </ul>
 
-    <div class="hidden overflow-visible rounded-2xl border border-stone-200/80 bg-white shadow-sm md:block">
+    <div class="hidden min-w-0 overflow-x-auto overflow-y-visible rounded-2xl border border-stone-200/80 bg-white shadow-sm lg:block">
         <table class="min-w-full text-left text-sm">
             <thead class="border-b border-stone-200 bg-stone-50 text-xs font-medium uppercase tracking-wide text-stone-500">
                 <tr>
@@ -50,12 +50,12 @@
                         hx-swap="innerHTML"
                     >
                         <td class="whitespace-nowrap px-4 py-3 font-medium text-stone-900">{{ shift.date }}</td>
-                        <td class="px-4 py-3">{{ shift.workplace.name }}</td>
+                        <td class="max-w-[10rem] truncate px-4 py-3 xl:max-w-xs">{{ shift.workplace.name }}</td>
                         <td class="whitespace-nowrap px-4 py-3">
                             {{ shift.start_time }} – {{ shift.end_time }}
                         </td>
                         <td class="whitespace-nowrap px-4 py-3">{{ shift.duration_display }}</td>
-                        <td class="whitespace-nowrap px-4 py-3 font-medium text-stone-900">
+                        <td class="whitespace-nowrap px-4 py-3 font-medium tabular-nums text-stone-900">
                             £{{ shift.estimated_earnings }}
                         </td>
                         <td class="whitespace-nowrap px-2 py-1 text-right">

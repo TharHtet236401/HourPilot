@@ -15,7 +15,7 @@
     >
     <link href="{% static 'css/output.css' %}" rel="stylesheet">
 </head>
-<body class="min-h-screen overflow-x-hidden bg-stone-50 font-sans text-stone-800 antialiased {% block body_class %}{% endblock %}">
+<body class="min-h-dvh overflow-x-hidden bg-stone-50 font-sans text-stone-800 antialiased {% block body_class %}{% endblock %}">
     {% block header %}
     <header class="border-b border-stone-200/80 bg-white/80 backdrop-blur">
         <nav class="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
@@ -66,7 +66,7 @@
         {% endif %}
     </div>
 
-    <main>
+    <main class="min-w-0 max-w-full">
         {% block content %}{% endblock %}
     </main>
 
@@ -101,6 +101,7 @@
             if (modal) {
                 modal.innerHTML = "";
             }
+            syncBodyScrollLock();
         }
 
         function setExportRangeActive(root, key) {
@@ -155,6 +156,15 @@
             return document.getElementById("app-shell")?.classList.contains("is-open");
         }
 
+        function isWideLayout() {
+            return window.matchMedia("(min-width: 1024px)").matches;
+        }
+
+        function syncBodyScrollLock() {
+            const modalOpen = Boolean(document.querySelector("#modal .modal-overlay"));
+            document.body.classList.toggle("overflow-hidden", modalOpen || isSidebarOpen());
+        }
+
         function setSidebarOpen(open) {
             const shell = document.getElementById("app-shell");
             const sidebar = document.getElementById("app-sidebar");
@@ -168,8 +178,8 @@
             sidebar.classList.toggle("-translate-x-full", !open);
             backdrop.classList.toggle("opacity-0", !open);
             backdrop.classList.toggle("pointer-events-none", !open);
-            document.body.classList.toggle("overflow-hidden", open);
             toggle?.setAttribute("aria-expanded", open ? "true" : "false");
+            syncBodyScrollLock();
         }
 
         const toastContainer = document.getElementById("toast-container");
@@ -189,6 +199,7 @@
         document.addEventListener("htmx:afterSwap", () => {
             initToasts();
             initExportRange();
+            syncBodyScrollLock();
         });
         document.addEventListener("htmx:beforeRequest", () => closeMenus());
         document.addEventListener("click", (event) => {
@@ -208,6 +219,15 @@
                     closeMenus(willOpen ? menu : null);
                     panel.hidden = !willOpen;
                     menuToggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+                    panel.classList.remove("bottom-full", "mb-1");
+                    panel.classList.add("mt-1");
+                    if (willOpen) {
+                        const space = window.innerHeight - menuToggle.getBoundingClientRect().bottom;
+                        if (space < 148) {
+                            panel.classList.remove("mt-1");
+                            panel.classList.add("bottom-full", "mb-1");
+                        }
+                    }
                 }
                 return;
             }
@@ -279,7 +299,7 @@
             closeModal();
         });
         window.addEventListener("resize", () => {
-            if (window.matchMedia("(min-width: 768px)").matches && isSidebarOpen()) {
+            if (isWideLayout() && isSidebarOpen()) {
                 setSidebarOpen(false);
             }
         });
