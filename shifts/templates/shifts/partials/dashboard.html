@@ -116,14 +116,22 @@
             </div>
             <ul class="mt-4 divide-y divide-stone-100">
                 {% for shift in stats.recent_shifts %}
-                    <li class="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0">
-                        <div class="min-w-0">
-                            <p class="truncate font-medium text-stone-900">{{ shift.workplace.name }}</p>
-                            <p class="mt-0.5 text-sm text-stone-500">
-                                {{ shift.date }} · {{ shift.duration_display }}
-                            </p>
-                        </div>
-                        <p class="shrink-0 font-semibold text-stone-900">£{{ shift.estimated_earnings }}</p>
+                    <li>
+                        <button
+                            type="button"
+                            hx-get="{% url 'shift_detail' shift.pk %}"
+                            hx-target="#modal"
+                            hx-swap="innerHTML"
+                            class="flex w-full items-start justify-between gap-3 py-3 text-left first:pt-0 last:pb-0 hover:text-teal-800"
+                        >
+                            <div class="min-w-0">
+                                <p class="truncate font-medium text-stone-900">{{ shift.workplace.name }}</p>
+                                <p class="mt-0.5 text-sm text-stone-500">
+                                    {{ shift.date }} · {{ shift.duration_display }}
+                                </p>
+                            </div>
+                            <p class="shrink-0 font-semibold text-stone-900">£{{ shift.estimated_earnings }}</p>
+                        </button>
                     </li>
                 {% endfor %}
             </ul>

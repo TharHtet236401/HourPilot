@@ -1,0 +1,119 @@
+<div
+    class="modal-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="workplace-detail-title"
+    onclick="if (event.target === this) closeModal()"
+>
+    <div class="modal-panel">
+        <div class="flex items-start justify-between gap-3">
+            <div>
+                <p class="text-xs font-medium uppercase tracking-[0.18em] text-teal-800">Workspace</p>
+                <h2 id="workplace-detail-title" class="mt-1 font-serif text-2xl tracking-tight text-stone-900">
+                    {% if workplace %}{{ workplace.name }}{% else %}Workplace{% endif %}
+                </h2>
+            </div>
+            <button
+                type="button"
+                onclick="closeModal()"
+                class="rounded-lg p-1 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
+                aria-label="Close"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                    <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                </svg>
+            </button>
+        </div>
+
+        {% if error %}
+            <div class="mt-4 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        {% if workplace %}
+            <dl class="mt-6 divide-y divide-stone-100">
+                <div class="flex items-start justify-between gap-4 py-3 first:pt-0">
+                    <dt class="text-sm text-stone-500">Status</dt>
+                    <dd>
+                        {% if workplace.is_active %}
+                            <span class="rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-medium text-teal-800">Active</span>
+                        {% else %}
+                            <span class="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-medium text-stone-500">Inactive</span>
+                        {% endif %}
+                    </dd>
+                </div>
+                <div class="flex items-start justify-between gap-4 py-3">
+                    <dt class="text-sm text-stone-500">Hourly rate</dt>
+                    <dd class="text-sm font-medium text-stone-900">£{{ workplace.hourly_rate }}</dd>
+                </div>
+                <div class="flex items-start justify-between gap-4 py-3">
+                    <dt class="text-sm text-stone-500">Calendar colour</dt>
+                    <dd class="flex items-center gap-2 text-sm font-medium text-stone-900">
+                        <span class="size-2.5 rounded-full cal-dot-{{ workplace.color_key }}"></span>
+                        {{ workplace.color_key|title }}
+                    </dd>
+                </div>
+                <div class="flex items-start justify-between gap-4 py-3">
+                    <dt class="text-sm text-stone-500">Shifts logged</dt>
+                    <dd class="text-sm font-medium text-stone-900">{{ summary.count }}</dd>
+                </div>
+                <div class="flex items-start justify-between gap-4 py-3">
+                    <dt class="text-sm text-stone-500">Hours worked</dt>
+                    <dd class="text-sm font-medium text-stone-900">{{ summary.hours_display }}</dd>
+                </div>
+                <div class="flex items-start justify-between gap-4 py-3">
+                    <dt class="text-sm text-stone-500">Total earned</dt>
+                    <dd class="text-sm font-medium text-stone-900">£{{ summary.pay }}</dd>
+                </div>
+                {% if first_shift %}
+                    <div class="flex items-start justify-between gap-4 py-3">
+                        <dt class="text-sm text-stone-500">First shift</dt>
+                        <dd class="text-sm font-medium text-stone-900">{{ first_shift|date:"j M Y" }}</dd>
+                    </div>
+                    <div class="flex items-start justify-between gap-4 py-3">
+                        <dt class="text-sm text-stone-500">Latest shift</dt>
+                        <dd class="text-sm font-medium text-stone-900">{{ last_shift|date:"j M Y" }}</dd>
+                    </div>
+                {% endif %}
+                <div class="flex items-start justify-between gap-4 py-3">
+                    <dt class="text-sm text-stone-500">Added</dt>
+                    <dd class="text-sm font-medium text-stone-900">{{ workplace.created_at|date:"j M Y, H:i" }}</dd>
+                </div>
+                <div class="flex items-start justify-between gap-4 py-3 last:pb-0">
+                    <dt class="text-sm text-stone-500">Last updated</dt>
+                    <dd class="text-sm font-medium text-stone-900">{{ workplace.updated_at|date:"j M Y, H:i" }}</dd>
+                </div>
+            </dl>
+
+            <div class="modal-actions pt-2">
+                <button
+                    type="button"
+                    onclick="closeModal()"
+                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-stone-600 transition hover:bg-stone-100"
+                >
+                    Close
+                </button>
+                <button
+                    type="button"
+                    hx-get="{% url 'workplace_update' workplace.pk %}"
+                    hx-target="#modal"
+                    hx-swap="innerHTML"
+                    class="rounded-xl bg-teal-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700"
+                >
+                    Edit
+                </button>
+            </div>
+        {% else %}
+            <div class="modal-actions">
+                <button
+                    type="button"
+                    onclick="closeModal()"
+                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-stone-600 transition hover:bg-stone-100"
+                >
+                    Close
+                </button>
+            </div>
+        {% endif %}
+    </div>
+</div>

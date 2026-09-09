@@ -10,6 +10,7 @@ from config.pagination import (
     page_number_from_request,
     paginate,
 )
+from shifts.services import summarize_shifts
 
 from .forms import WorkplaceForm
 from .models import Workplace
@@ -72,6 +73,40 @@ def workplace_list(request):
                 "page_obj": None,
                 "page_url_name": "workplace_list",
                 "list_target": "#workplace-list",
+            },
+        )
+
+
+@login_required
+def workplace_detail(request, pk):
+    try:
+        workplace = get_object_or_404(
+            Workplace.objects.annotate(shift_count=Count("shifts")),
+            pk=pk,
+            user=request.user,
+        )
+        shifts = list(workplace.shifts.order_by("date", "start_time"))
+        dates = [shift.date for shift in shifts]
+        return render(
+            request,
+            "workspaces/partials/modal_detail.html",
+            {
+                "workplace": workplace,
+                "summary": summarize_shifts(shifts),
+                "first_shift": dates[0] if dates else None,
+                "last_shift": dates[-1] if dates else None,
+            },
+        )
+    except Exception:
+        return render(
+            request,
+            "workspaces/partials/modal_detail.html",
+            {
+                "workplace": None,
+                "summary": summarize_shifts([]),
+                "first_shift": None,
+                "last_shift": None,
+                "error": "Could not load this workplace.",
             },
         )
 

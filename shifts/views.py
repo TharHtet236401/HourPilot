@@ -384,6 +384,30 @@ def shift_export_csv(request):
 
 
 @login_required
+def shift_detail(request, pk):
+    try:
+        shift = get_object_or_404(
+            Shift.objects.select_related("workplace"),
+            pk=pk,
+            user=request.user,
+        )
+        return render(
+            request,
+            "shifts/partials/modal_detail.html",
+            {"shift": shift},
+        )
+    except Exception:
+        return render(
+            request,
+            "shifts/partials/modal_detail.html",
+            {
+                "shift": None,
+                "error": "Could not load this shift.",
+            },
+        )
+
+
+@login_required
 def shift_create(request):
     try:
         workplaces = Workplace.objects.filter(

@@ -11,6 +11,7 @@ urlpatterns = [
     path("shifts/export/", views.shift_export_form, name="shift_export"),
     path("shifts/export/csv/", views.shift_export_csv, name="shift_export_csv"),
     path("shifts/add/", views.shift_create, name="shift_create"),
+    path("shifts/<int:pk>/", views.shift_detail, name="shift_detail"),
     path("shifts/<int:pk>/edit/", views.shift_update, name="shift_update"),
     path("shifts/<int:pk>/delete/", views.shift_delete, name="shift_delete"),
 ]

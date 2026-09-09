@@ -1,0 +1,130 @@
+<div
+    class="modal-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="shift-detail-title"
+    onclick="if (event.target === this) closeModal()"
+>
+    <div class="modal-panel">
+        <div class="flex items-start justify-between gap-3">
+            <div>
+                <p class="text-xs font-medium uppercase tracking-[0.18em] text-teal-800">Shift</p>
+                <h2 id="shift-detail-title" class="mt-1 font-serif text-2xl tracking-tight text-stone-900">
+                    {% if shift %}{{ shift.workplace.name }}{% else %}Shift{% endif %}
+                </h2>
+                {% if shift %}
+                    <p class="mt-1 text-sm text-stone-500">{{ shift.date|date:"l j F Y" }}</p>
+                {% endif %}
+            </div>
+            <button
+                type="button"
+                onclick="closeModal()"
+                class="rounded-lg p-1 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
+                aria-label="Close"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                    <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                </svg>
+            </button>
+        </div>
+
+        {% if error %}
+            <div class="mt-4 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-sm text-red-700">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        {% if shift %}
+            <dl class="mt-6 divide-y divide-stone-100">
+                <div class="flex items-start justify-between gap-4 py-3 first:pt-0">
+                    <dt class="text-sm text-stone-500">Workplace</dt>
+                    <dd>
+                        <button
+                            type="button"
+                            hx-get="{% url 'workplace_detail' shift.workplace.pk %}"
+                            hx-target="#modal"
+                            hx-swap="innerHTML"
+                            class="inline-flex items-center gap-2 text-sm font-medium text-teal-800 hover:underline"
+                        >
+                            <span class="size-2.5 rounded-full cal-dot-{{ shift.workplace.color_key }}"></span>
+                            {{ shift.workplace.name }}
+                        </button>
+                    </dd>
+                </div>
+                <div class="flex items-start justify-between gap-4 py-3">
+                    <dt class="text-sm text-stone-500">Date</dt>
+                    <dd class="text-sm font-medium text-stone-900">{{ shift.date|date:"j M Y" }}</dd>
+                </div>
+                <div class="flex items-start justify-between gap-4 py-3">
+                    <dt class="text-sm text-stone-500">Start</dt>
+                    <dd class="text-sm font-medium text-stone-900">{{ shift.start_time|time:"H:i" }}</dd>
+                </div>
+                <div class="flex items-start justify-between gap-4 py-3">
+                    <dt class="text-sm text-stone-500">End</dt>
+                    <dd class="text-sm font-medium text-stone-900">{{ shift.end_time|time:"H:i" }}</dd>
+                </div>
+                <div class="flex items-start justify-between gap-4 py-3">
+                    <dt class="text-sm text-stone-500">Break</dt>
+                    <dd class="text-sm font-medium text-stone-900">
+                        {% if shift.break_minutes %}{{ shift.break_minutes }} min{% else %}None{% endif %}
+                    </dd>
+                </div>
+                <div class="flex items-start justify-between gap-4 py-3">
+                    <dt class="text-sm text-stone-500">Duration</dt>
+                    <dd class="text-sm font-medium text-stone-900">{{ shift.duration_display }}</dd>
+                </div>
+                <div class="flex items-start justify-between gap-4 py-3">
+                    <dt class="text-sm text-stone-500">Rate used</dt>
+                    <dd class="text-sm font-medium text-stone-900">£{{ shift.hourly_rate_at_time }} / hour</dd>
+                </div>
+                <div class="flex items-start justify-between gap-4 py-3">
+                    <dt class="text-sm text-stone-500">Pay</dt>
+                    <dd class="text-sm font-medium text-stone-900">£{{ shift.estimated_earnings }}</dd>
+                </div>
+                <div class="flex items-start justify-between gap-4 py-3">
+                    <dt class="text-sm text-stone-500">Notes</dt>
+                    <dd class="max-w-[16rem] text-right text-sm font-medium text-stone-900">
+                        {% if shift.notes %}{{ shift.notes }}{% else %}—{% endif %}
+                    </dd>
+                </div>
+                <div class="flex items-start justify-between gap-4 py-3">
+                    <dt class="text-sm text-stone-500">Logged</dt>
+                    <dd class="text-sm font-medium text-stone-900">{{ shift.created_at|date:"j M Y, H:i" }}</dd>
+                </div>
+                <div class="flex items-start justify-between gap-4 py-3 last:pb-0">
+                    <dt class="text-sm text-stone-500">Last updated</dt>
+                    <dd class="text-sm font-medium text-stone-900">{{ shift.updated_at|date:"j M Y, H:i" }}</dd>
+                </div>
+            </dl>
+
+            <div class="modal-actions pt-2">
+                <button
+                    type="button"
+                    onclick="closeModal()"
+                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-stone-600 transition hover:bg-stone-100"
+                >
+                    Close
+                </button>
+                <button
+                    type="button"
+                    hx-get="{% url 'shift_update' shift.pk %}"
+                    hx-target="#modal"
+                    hx-swap="innerHTML"
+                    class="rounded-xl bg-teal-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700"
+                >
+                    Edit
+                </button>
+            </div>
+        {% else %}
+            <div class="modal-actions">
+                <button
+                    type="button"
+                    onclick="closeModal()"
+                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-stone-600 transition hover:bg-stone-100"
+                >
+                    Close
+                </button>
+            </div>
+        {% endif %}
+    </div>
+</div>
