@@ -8,7 +8,7 @@
         <div>
             <p class="text-xs font-medium uppercase tracking-[0.18em] text-teal-800">Shifts</p>
             <h1 class="mt-2 font-serif text-2xl tracking-tight text-stone-900 sm:text-3xl">Your shifts</h1>
-            <p class="mt-2 max-w-xl text-sm leading-6 text-stone-500">
+            <p class="mt-2 hidden max-w-xl text-sm leading-6 text-stone-500 sm:block">
                 Hours you have already logged, with duration and estimated pay.
             </p>
         </div>
@@ -45,7 +45,7 @@
         </div>
     </div>
 
-    <div id="shift-list" class="mt-8">
+    <div id="shift-list" class="mt-5 sm:mt-8">
         {% include "shifts/partials/list.html" %}
     </div>
 </div>
