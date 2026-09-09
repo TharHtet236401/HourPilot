@@ -2,6 +2,8 @@ import csv
 import io
 import re
 
+from accounts.prefs import prefs_for
+
 from .services import format_minutes, summarize_shifts
 
 
@@ -28,10 +30,17 @@ def export_filename(workplace=None, date_from=None, date_to=None):
     return f"{'-'.join(parts)}.csv"
 
 
-def shifts_csv(shifts):
+def shifts_csv(shifts, user=None):
+    prefs = prefs_for(user)
     buffer = io.StringIO()
     buffer.write("\ufeff")
     writer = csv.writer(buffer)
+    writer.writerow(["HourPilot timesheet"])
+    if prefs.display_name:
+        writer.writerow(["Name", prefs.display_name])
+    if user is not None and getattr(user, "email", ""):
+        writer.writerow(["Email", user.email])
+    writer.writerow([])
     writer.writerow(
         [
             "Date",
@@ -40,8 +49,8 @@ def shifts_csv(shifts):
             "End",
             "Break (minutes)",
             "Duration",
-            "Hourly rate",
-            "Pay",
+            f"Hourly rate ({prefs.currency_symbol})",
+            f"Pay ({prefs.currency_symbol})",
             "Notes",
         ]
     )
@@ -49,7 +58,7 @@ def shifts_csv(shifts):
     for shift in shifts:
         writer.writerow(
             [
-                shift.date.isoformat(),
+                prefs.format_date(shift.date),
                 shift.workplace.name,
                 shift.start_time.strftime("%H:%M"),
                 shift.end_time.strftime("%H:%M"),

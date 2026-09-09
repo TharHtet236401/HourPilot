@@ -10,7 +10,7 @@
         <circle cx="50" cy="50" r="24" fill="white"></circle>
     </svg>
     <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
-        <p class="font-serif text-lg tracking-tight text-stone-900">{% if center_kind == "pay" %}£{% endif %}{{ center_value }}</p>
+        <p class="font-serif text-lg tracking-tight text-stone-900">{% if center_kind == "pay" %}{{ prefs.currency_symbol }}{% endif %}{{ center_value }}</p>
         <p class="text-[11px] text-stone-400">{{ center_label }}</p>
     </div>
 </div>

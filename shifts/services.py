@@ -6,6 +6,12 @@ from decimal import Decimal
 
 from django.utils import timezone
 
+from accounts.prefs import (
+    WEEKDAY_LABELS,
+    calendar_firstweekday,
+    prefs_for,
+    week_start_date,
+)
 from workspaces.colors import workplace_color_hex, workplace_color_key
 
 
@@ -90,16 +96,20 @@ def _slice_path(start_deg, sweep, cx=50, cy=50, radius=40):
     )
 
 
-def workplace_pies(breakdown):
+def workplace_pies(breakdown, currency_symbol="£"):
     pay_total = sum((row["pay"] for row in breakdown), Decimal("0.00"))
     minutes_total = sum(row["minutes"] for row in breakdown)
     return {
-        "pay": _pie_slices(breakdown, "pay", pay_total, money=True),
-        "hours": _pie_slices(breakdown, "minutes", minutes_total, money=False),
+        "pay": _pie_slices(
+            breakdown, "pay", pay_total, money=True, currency_symbol=currency_symbol
+        ),
+        "hours": _pie_slices(
+            breakdown, "minutes", minutes_total, money=False, currency_symbol=currency_symbol
+        ),
     }
 
 
-def _pie_slices(breakdown, value_key, total, money):
+def _pie_slices(breakdown, value_key, total, money, currency_symbol="£"):
     slices = []
     if total <= 0:
         return slices
@@ -130,7 +140,9 @@ def _pie_slices(breakdown, value_key, total, money):
                 "percent": percent,
                 "full": full,
                 "path": None if full else _slice_path(cursor, max(sweep, 0.01)),
-                "value_display": f"£{row['pay']}" if money else row["hours_display"],
+                "value_display": (
+                    f"{currency_symbol}{row['pay']}" if money else row["hours_display"]
+                ),
             }
         )
         cursor += sweep
@@ -151,6 +163,30 @@ def empty_dashboard_stats():
         "recent_shifts": [],
         "workplaces": [],
         "selected_workplace": None,
+        "week_goal": None,
+    }
+
+
+def _week_goal(week_summary, goal_hours):
+    if not goal_hours:
+        return None
+    goal_minutes = int(Decimal(goal_hours) * 60)
+    if goal_minutes <= 0:
+        return None
+    remaining = goal_minutes - week_summary["minutes"]
+    percent = int(
+        (Decimal(week_summary["minutes"]) / Decimal(goal_minutes) * 100).quantize(
+            Decimal(1)
+        )
+    )
+    return {
+        "goal_display": format_minutes(goal_minutes),
+        "worked_display": week_summary["hours_display"],
+        "remaining_minutes": remaining,
+        "remaining_display": format_minutes(abs(remaining)),
+        "met": remaining <= 0,
+        "over": remaining < 0,
+        "percent": min(percent, 100),
     }
 
 
@@ -162,8 +198,9 @@ def dashboard_stats(user, workplace=None):
         shifts_query = shifts_query.filter(workplace=workplace)
 
     shifts = list(shifts_query)
+    prefs = prefs_for(user)
     today = timezone.localdate()
-    week_start = today - timedelta(days=today.weekday())
+    week_start = week_start_date(today, prefs.week_start)
     month_start = today.replace(day=1)
 
     week_shifts = [shift for shift in shifts if shift.date >= week_start]
@@ -175,10 +212,11 @@ def dashboard_stats(user, workplace=None):
     if hours > 0:
         average_rate = (all_time["pay"] / hours).quantize(Decimal("0.01"))
 
+    week = summarize_shifts(week_shifts)
     return {
         "has_shifts": bool(shifts),
         "all_time": all_time,
-        "week": summarize_shifts(week_shifts),
+        "week": week,
         "month": summarize_shifts(month_shifts),
         "average_rate": average_rate,
         "workplace_count": user.workplaces.count(),
@@ -186,6 +224,7 @@ def dashboard_stats(user, workplace=None):
         "recent_shifts": shifts[:5],
         "workplaces": list(user.workplaces.order_by("name")),
         "selected_workplace": workplace,
+        "week_goal": _week_goal(week, prefs.weekly_hour_goal),
     }
 
 
@@ -210,9 +249,9 @@ def _shift_month(year, month, delta):
     return next_year, next_month + 1
 
 
-def _period_bounds(period, today):
+def _period_bounds(period, today, week_start="mon"):
     if period == "week":
-        start = today - timedelta(days=today.weekday())
+        start = week_start_date(today, week_start)
         end = start + timedelta(days=6)
         previous_start = start - timedelta(days=7)
         previous_end = start - timedelta(days=1)
@@ -267,20 +306,20 @@ def _nice_axis_max(max_pay):
     return Decimal(str(nice * magnitude)).quantize(Decimal("0.01"))
 
 
-def _format_axis_pay(amount):
+def _format_axis_pay(amount, currency_symbol="£"):
     amount = Decimal(amount).quantize(Decimal("0.01"))
     if amount == amount.to_integral_value():
-        return f"£{int(amount)}"
-    return f"£{amount}"
+        return f"{currency_symbol}{int(amount)}"
+    return f"{currency_symbol}{amount}"
 
 
-def _timeline_axis(axis_max):
+def _timeline_axis(axis_max, currency_symbol="£"):
     ticks = []
     for step in (4, 3, 2, 1, 0):
         amount = (axis_max * Decimal(step) / Decimal(4)).quantize(Decimal("0.01"))
         ticks.append(
             {
-                "label": _format_axis_pay(amount),
+                "label": _format_axis_pay(amount, currency_symbol),
                 "percent": step * 25,
             }
         )
@@ -312,21 +351,21 @@ def _day_highlights(shifts):
     return {"busiest_day": busiest, "best_pay_day": best_pay}
 
 
-def _timeline_points(shifts, period, today):
+def _timeline_points(shifts, period, today, prefs):
     by_day = defaultdict(list)
     for shift in shifts:
         by_day[shift.date].append(shift)
 
     points = []
     if period == "week":
-        week_start = today - timedelta(days=today.weekday())
+        start = week_start_date(today, prefs.week_start)
         for offset in range(7):
-            day = week_start + timedelta(days=offset)
+            day = start + timedelta(days=offset)
             summary = summarize_shifts(by_day.get(day, []))
             points.append(
                 {
                     "label": day.strftime("%a"),
-                    "title": day.strftime("%A %d %b"),
+                    "title": prefs.format_date(day, "long"),
                     "is_current": day == today,
                     **summary,
                 }
@@ -339,7 +378,7 @@ def _timeline_points(shifts, period, today):
             points.append(
                 {
                     "label": str(day_number),
-                    "title": day.strftime("%A %d %b"),
+                    "title": prefs.format_date(day, "long"),
                     "is_current": day == today,
                     **summary,
                 }
@@ -380,7 +419,7 @@ def _timeline_points(shifts, period, today):
     axis_max = _nice_axis_max(max_pay)
     for point in points:
         point["percent"] = _bar_percent(point["pay"], axis_max)
-    return points, _timeline_axis(axis_max)
+    return points, axis_max
 
 
 def empty_statistics_stats():
@@ -412,7 +451,10 @@ def statistics_stats(user, period="month", workplace=None):
         period = "month"
 
     today = timezone.localdate()
-    start, end, previous_start, previous_end = _period_bounds(period, today)
+    prefs = prefs_for(user)
+    start, end, previous_start, previous_end = _period_bounds(
+        period, today, prefs.week_start
+    )
     period_label = next(item["label"] for item in STAT_PERIODS if item["key"] == period)
 
     shifts_query = user.shifts.select_related("workplace")
@@ -452,13 +494,13 @@ def statistics_stats(user, period="month", workplace=None):
     if summary["count"]:
         average_shift = format_minutes(summary["minutes"] // summary["count"])
 
-    timeline, timeline_axis = _timeline_points(period_shifts, period, today)
+    timeline, axis_max = _timeline_points(period_shifts, period, today, prefs)
 
     return {
         "has_shifts": bool(period_shifts),
         "period": period,
         "period_label": period_label,
-        "period_range_label": _format_range(start, end, shifts, today),
+        "period_range_label": _format_range(start, end, shifts, today, prefs),
         "periods": STAT_PERIODS,
         "summary": summary,
         "previous": previous,
@@ -466,21 +508,21 @@ def statistics_stats(user, period="month", workplace=None):
         "average_rate": _average_rate(summary),
         "average_shift": average_shift,
         "by_workplace": breakdown,
-        "pie": workplace_pies(breakdown),
+        "pie": workplace_pies(breakdown, prefs.currency_symbol),
         "timeline": timeline,
-        "timeline_axis": timeline_axis,
+        "timeline_axis": _timeline_axis(axis_max, prefs.currency_symbol),
         "highlights": _day_highlights(period_shifts),
         "workplaces": list(user.workplaces.order_by("name")),
         "selected_workplace": workplace,
     }
 
 
-def _format_range(start, end, shifts, today):
+def _format_range(start, end, shifts, today, prefs):
     if start:
-        return f"{start.strftime('%d %b %Y')} – {end.strftime('%d %b %Y')}"
+        return f"{prefs.format_date(start)} – {prefs.format_date(end)}"
     if shifts:
         first = min(shift.date for shift in shifts)
-        return f"{first.strftime('%d %b %Y')} – {today.strftime('%d %b %Y')}"
+        return f"{prefs.format_date(first)} – {prefs.format_date(today)}"
     return ""
 
 
@@ -512,13 +554,14 @@ def unique_workplaces(shifts):
     return workplaces
 
 
-def empty_calendar_month(year=None, month=None):
+def empty_calendar_month(year=None, month=None, week_start="mon"):
     today = timezone.localdate()
     year = year or today.year
     month = month or today.month
     first, _last, prev_year, prev_month, next_year, next_month = _month_bounds(
         year, month
     )
+    labels = WEEKDAY_LABELS.get(week_start, WEEKDAY_LABELS["mon"])
     return {
         "year": year,
         "month": month,
@@ -529,13 +572,14 @@ def empty_calendar_month(year=None, month=None):
         "prev_month": prev_month,
         "next_year": next_year,
         "next_month": next_month,
-        "weekday_labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        "weekday_labels": list(labels),
         "workplace_legend": [],
     }
 
 
 def calendar_month(user, year, month):
     today = timezone.localdate()
+    prefs = prefs_for(user)
     first, last, prev_year, prev_month, next_year, next_month = _month_bounds(
         year, month
     )
@@ -549,9 +593,9 @@ def calendar_month(user, year, month):
         by_day[shift.date].append(shift)
 
     weeks = []
-    for week in calendar.Calendar(firstweekday=calendar.MONDAY).monthdatescalendar(
-        year, month
-    ):
+    for week in calendar.Calendar(
+        firstweekday=calendar_firstweekday(prefs.week_start)
+    ).monthdatescalendar(year, month):
         days = []
         for day in week:
             day_shifts = by_day.get(day, [])
@@ -584,7 +628,7 @@ def calendar_month(user, year, month):
         "prev_month": prev_month,
         "next_year": next_year,
         "next_month": next_month,
-        "weekday_labels": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        "weekday_labels": list(prefs.weekday_labels),
         "workplace_legend": sorted(
             unique_workplaces(shifts), key=lambda workplace: workplace.name.lower()
         ),

@@ -45,7 +45,7 @@
                 </div>
                 <div class="flex items-start justify-between gap-4 py-3">
                     <dt class="text-sm text-stone-500">Hourly rate</dt>
-                    <dd class="text-sm font-medium text-stone-900">£{{ workplace.hourly_rate }}</dd>
+                    <dd class="text-sm font-medium text-stone-900">{{ prefs.currency_symbol }}{{ workplace.hourly_rate }}</dd>
                 </div>
                 <div class="flex items-start justify-between gap-4 py-3">
                     <dt class="text-sm text-stone-500">Calendar colour</dt>
@@ -64,25 +64,25 @@
                 </div>
                 <div class="flex items-start justify-between gap-4 py-3">
                     <dt class="text-sm text-stone-500">Total earned</dt>
-                    <dd class="text-sm font-medium text-stone-900">£{{ summary.pay }}</dd>
+                    <dd class="text-sm font-medium text-stone-900">{{ prefs.currency_symbol }}{{ summary.pay }}</dd>
                 </div>
                 {% if first_shift %}
                     <div class="flex items-start justify-between gap-4 py-3">
                         <dt class="text-sm text-stone-500">First shift</dt>
-                        <dd class="text-sm font-medium text-stone-900">{{ first_shift|date:"j M Y" }}</dd>
+                        <dd class="text-sm font-medium text-stone-900">{{ first_shift|date:prefs.date_medium }}</dd>
                     </div>
                     <div class="flex items-start justify-between gap-4 py-3">
                         <dt class="text-sm text-stone-500">Latest shift</dt>
-                        <dd class="text-sm font-medium text-stone-900">{{ last_shift|date:"j M Y" }}</dd>
+                        <dd class="text-sm font-medium text-stone-900">{{ last_shift|date:prefs.date_medium }}</dd>
                     </div>
                 {% endif %}
                 <div class="flex items-start justify-between gap-4 py-3">
                     <dt class="text-sm text-stone-500">Added</dt>
-                    <dd class="text-sm font-medium text-stone-900">{{ workplace.created_at|date:"j M Y, H:i" }}</dd>
+                    <dd class="text-sm font-medium text-stone-900">{{ workplace.created_at|date:prefs.date_datetime }}</dd>
                 </div>
                 <div class="flex items-start justify-between gap-4 py-3 last:pb-0">
                     <dt class="text-sm text-stone-500">Last updated</dt>
-                    <dd class="text-sm font-medium text-stone-900">{{ workplace.updated_at|date:"j M Y, H:i" }}</dd>
+                    <dd class="text-sm font-medium text-stone-900">{{ workplace.updated_at|date:prefs.date_datetime }}</dd>
                 </div>
             </dl>
 

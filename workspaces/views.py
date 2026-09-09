@@ -4,6 +4,7 @@ from django.db.models import Count
 from django.db.models.deletion import ProtectedError
 from django.shortcuts import get_object_or_404, render
 
+from accounts.prefs import prefs_for
 from config.pagination import (
     WORKPLACE_PAGE_SIZE,
     list_page_url,
@@ -14,6 +15,15 @@ from shifts.services import summarize_shifts
 
 from .forms import WorkplaceForm
 from .models import Workplace
+
+
+def _workplace_form(request, data=None, instance=None):
+    kwargs = {"currency_symbol": prefs_for(request.user).currency_symbol}
+    if instance is not None:
+        kwargs["instance"] = instance
+    if data is not None:
+        return WorkplaceForm(data, **kwargs)
+    return WorkplaceForm(**kwargs)
 
 
 def _user_workplaces(user):
@@ -115,14 +125,14 @@ def workplace_detail(request, pk):
 def workplace_create(request):
     try:
         if request.method == "POST":
-            form = WorkplaceForm(request.POST)
+            form = _workplace_form(request, data=request.POST)
             if form.is_valid():
                 workplace = form.save(commit=False)
                 workplace.user = request.user
                 workplace.save()
                 return _workplace_form_success(request, "Workplace added.", page=1)
         else:
-            form = WorkplaceForm()
+            form = _workplace_form(request)
 
         return render(
             request,
@@ -130,7 +140,7 @@ def workplace_create(request):
             {"form": form},
         )
     except Exception:
-        form = WorkplaceForm(request.POST or None)
+        form = _workplace_form(request, data=request.POST or None)
         return render(
             request,
             "workspaces/partials/modal_form.html",
@@ -147,12 +157,12 @@ def workplace_update(request, pk):
 
     try:
         if request.method == "POST":
-            form = WorkplaceForm(request.POST, instance=workplace)
+            form = _workplace_form(request, data=request.POST, instance=workplace)
             if form.is_valid():
                 form.save()
                 return _workplace_form_success(request, "Workplace updated.")
         else:
-            form = WorkplaceForm(instance=workplace)
+            form = _workplace_form(request, instance=workplace)
 
         return render(
             request,
@@ -160,7 +170,9 @@ def workplace_update(request, pk):
             {"form": form, "workplace": workplace},
         )
     except Exception:
-        form = WorkplaceForm(request.POST or None, instance=workplace)
+        form = _workplace_form(
+            request, data=request.POST or None, instance=workplace
+        )
         return render(
             request,
             "workspaces/partials/modal_form.html",

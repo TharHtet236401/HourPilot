@@ -11,14 +11,14 @@
                     <div class="min-w-0">
                         <p class="truncate font-medium text-stone-900">{{ shift.workplace.name }}</p>
                         <p class="mt-0.5 truncate text-sm text-stone-500">
-                            {{ shift.date|date:"j M" }}
+                            {{ shift.date|date:prefs.date_short }}
                             <span class="text-stone-300">·</span>
                             {{ shift.duration_display }}
                         </p>
                     </div>
                     <div class="flex shrink-0 items-center gap-1">
                         <p class="text-sm font-semibold tabular-nums text-stone-900">
-                            £{{ shift.estimated_earnings }}
+                            {{ prefs.currency_symbol }}{{ shift.estimated_earnings }}
                         </p>
                         {% url 'shift_update' shift.pk as shift_edit_url %}
                         {% url 'shift_delete' shift.pk as shift_delete_url %}
@@ -49,14 +49,14 @@
                         hx-target="#modal"
                         hx-swap="innerHTML"
                     >
-                        <td class="whitespace-nowrap px-4 py-3 font-medium text-stone-900">{{ shift.date }}</td>
+                        <td class="whitespace-nowrap px-4 py-3 font-medium text-stone-900">{{ shift.date|date:prefs.date_medium }}</td>
                         <td class="max-w-[10rem] truncate px-4 py-3 xl:max-w-xs">{{ shift.workplace.name }}</td>
                         <td class="whitespace-nowrap px-4 py-3">
                             {{ shift.start_time }} – {{ shift.end_time }}
                         </td>
                         <td class="whitespace-nowrap px-4 py-3">{{ shift.duration_display }}</td>
                         <td class="whitespace-nowrap px-4 py-3 font-medium tabular-nums text-stone-900">
-                            £{{ shift.estimated_earnings }}
+                            {{ prefs.currency_symbol }}{{ shift.estimated_earnings }}
                         </td>
                         <td class="whitespace-nowrap px-2 py-1 text-right">
                             <div class="flex justify-end">

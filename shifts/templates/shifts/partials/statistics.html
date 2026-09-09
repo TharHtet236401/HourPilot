@@ -52,7 +52,7 @@
 <div class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
     <div class="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm">
         <p class="text-sm text-stone-500">Earned</p>
-        <p class="mt-2 break-words font-serif text-2xl tracking-tight text-stone-900 sm:text-3xl">£{{ stats.summary.pay }}</p>
+        <p class="mt-2 break-words font-serif text-2xl tracking-tight text-stone-900 sm:text-3xl">{{ prefs.currency_symbol }}{{ stats.summary.pay }}</p>
         {% if stats.change %}
             <p class="mt-1 text-xs {% if stats.change.up %}text-teal-800{% else %}text-rose-700{% endif %}">
                 {% if stats.change.up %}+{% endif %}{{ stats.change.percent }}% vs previous
@@ -68,7 +68,7 @@
     </div>
     <div class="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm">
         <p class="text-sm text-stone-500">Average rate</p>
-        <p class="mt-2 break-words font-serif text-2xl tracking-tight text-stone-900 sm:text-3xl">£{{ stats.average_rate }}</p>
+        <p class="mt-2 break-words font-serif text-2xl tracking-tight text-stone-900 sm:text-3xl">{{ prefs.currency_symbol }}{{ stats.average_rate }}</p>
         <p class="mt-1 text-xs text-stone-400">Per hour worked</p>
     </div>
     <div class="rounded-2xl border border-stone-200/80 bg-white p-5 shadow-sm">
@@ -116,7 +116,7 @@
                             {% for point in stats.timeline %}
                                 <div
                                     class="flex h-full min-w-0 flex-1 items-end"
-                                    title="{{ point.title }} · £{{ point.pay }} · {{ point.hours_display }}"
+                                    title="{{ point.title }} · {{ prefs.currency_symbol }}{{ point.pay }} · {{ point.hours_display }}"
                                 >
                                     <div
                                         class="w-full rounded-t-md {% if point.is_current %}bg-teal-800{% else %}bg-teal-600/80{% endif %}"
@@ -188,7 +188,7 @@
                                 </div>
                                 <div class="shrink-0 text-right">
                                     <p class="font-semibold text-stone-900" data-pie-pay>
-                                        £{{ workplace.pay }}
+                                        {{ prefs.currency_symbol }}{{ workplace.pay }}
                                     </p>
                                     <p class="hidden font-semibold text-stone-900" data-pie-hours>
                                         {{ workplace.hours_display }}
@@ -223,10 +223,10 @@
                     <li class="py-3 first:pt-0">
                         <p class="text-sm text-stone-500">Highest earning day</p>
                         <p class="mt-1 font-medium text-stone-900">
-                            {{ stats.highlights.best_pay_day.date|date:"l j F" }}
+                            {{ stats.highlights.best_pay_day.date|date:prefs.date_long }}
                         </p>
                         <p class="mt-0.5 text-sm text-stone-500">
-                            £{{ stats.highlights.best_pay_day.pay }}
+                            {{ prefs.currency_symbol }}{{ stats.highlights.best_pay_day.pay }}
                             · {{ stats.highlights.best_pay_day.hours_display }}
                         </p>
                     </li>
@@ -235,11 +235,11 @@
                     <li class="py-3 last:pb-0">
                         <p class="text-sm text-stone-500">Longest day</p>
                         <p class="mt-1 font-medium text-stone-900">
-                            {{ stats.highlights.busiest_day.date|date:"l j F" }}
+                            {{ stats.highlights.busiest_day.date|date:prefs.date_long }}
                         </p>
                         <p class="mt-0.5 text-sm text-stone-500">
                             {{ stats.highlights.busiest_day.hours_display }}
-                            · £{{ stats.highlights.busiest_day.pay }}
+                            · {{ prefs.currency_symbol }}{{ stats.highlights.busiest_day.pay }}
                         </p>
                     </li>
                 {% endif %}

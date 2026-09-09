@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 from urllib.parse import parse_qs, urlparse
 
 from django.contrib import messages
@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
+from accounts.prefs import prefs_for, week_start_date
 from config.pagination import (
     SHIFT_PAGE_SIZE,
     list_page_url,
@@ -241,7 +242,11 @@ def shift_calendar(request):
             if request.headers.get("HX-Request")
             else "shifts/calendar.html"
         )
-        return render(request, template, empty_calendar_month())
+        return render(
+            request,
+            template,
+            empty_calendar_month(week_start=prefs_for(request.user).week_start),
+        )
 
 
 @login_required
@@ -326,7 +331,9 @@ def _export_form_context(request, form=None):
     return {
         "form": form,
         "today": today.isoformat(),
-        "week_start": (today - timedelta(days=today.weekday())).isoformat(),
+        "week_start": week_start_date(
+            today, prefs_for(request.user).week_start
+        ).isoformat(),
         "month_start": today.replace(day=1).isoformat(),
         "year_start": today.replace(month=1, day=1).isoformat(),
         "all_from": all_from.isoformat(),
@@ -371,7 +378,7 @@ def shift_export_csv(request):
             date_to=date_to,
         )
         response = HttpResponse(
-            shifts_csv(shifts),
+            shifts_csv(shifts, user=request.user),
             content_type="text/csv; charset=utf-8",
         )
         response["Content-Disposition"] = (

@@ -11,7 +11,7 @@
                     <div class="min-w-0">
                         <h2 class="truncate font-medium text-stone-900">{{ workplace.name }}</h2>
                         <p class="mt-0.5 truncate text-sm text-stone-500 sm:hidden">
-                            £{{ workplace.hourly_rate }}/hr
+                            {{ prefs.currency_symbol }}{{ workplace.hourly_rate }}/hr
                             <span class="text-stone-300">·</span>
                             {{ workplace.shift_count }} shift{{ workplace.shift_count|pluralize }}
                         </p>
@@ -28,7 +28,7 @@
                     </div>
                 </div>
                 <p class="mt-3 hidden text-2xl font-semibold tracking-tight text-stone-900 sm:block">
-                    £{{ workplace.hourly_rate }}
+                    {{ prefs.currency_symbol }}{{ workplace.hourly_rate }}
                     <span class="text-sm font-medium text-stone-400">/ hour</span>
                 </p>
                 <p class="mt-1 hidden text-xs text-stone-500 sm:block">

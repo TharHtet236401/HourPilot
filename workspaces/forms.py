@@ -18,12 +18,13 @@ class WorkplaceForm(forms.ModelForm):
             ),
         }
         labels = {
-            "hourly_rate": "Hourly rate (£)",
+            "hourly_rate": "Hourly rate",
             "is_active": "Active workplace",
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, currency_symbol="£", **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["hourly_rate"].label = f"Hourly rate ({currency_symbol})"
         if not self.instance.pk:
             self.fields.pop("is_active")
 

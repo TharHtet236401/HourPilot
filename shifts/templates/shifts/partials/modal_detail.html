@@ -13,7 +13,7 @@
                     {% if shift %}{{ shift.workplace.name }}{% else %}Shift{% endif %}
                 </h2>
                 {% if shift %}
-                    <p class="mt-1 text-sm text-stone-500">{{ shift.date|date:"l j F Y" }}</p>
+                    <p class="mt-1 text-sm text-stone-500">{{ shift.date|date:prefs.date_long }}</p>
                 {% endif %}
             </div>
             <button
@@ -53,7 +53,7 @@
                 </div>
                 <div class="flex items-start justify-between gap-4 py-3">
                     <dt class="text-sm text-stone-500">Date</dt>
-                    <dd class="text-sm font-medium text-stone-900">{{ shift.date|date:"j M Y" }}</dd>
+                    <dd class="text-sm font-medium text-stone-900">{{ shift.date|date:prefs.date_medium }}</dd>
                 </div>
                 <div class="flex items-start justify-between gap-4 py-3">
                     <dt class="text-sm text-stone-500">Start</dt>
@@ -75,11 +75,11 @@
                 </div>
                 <div class="flex items-start justify-between gap-4 py-3">
                     <dt class="text-sm text-stone-500">Rate used</dt>
-                    <dd class="text-sm font-medium text-stone-900">£{{ shift.hourly_rate_at_time }} / hour</dd>
+                    <dd class="text-sm font-medium text-stone-900">{{ prefs.currency_symbol }}{{ shift.hourly_rate_at_time }} / hour</dd>
                 </div>
                 <div class="flex items-start justify-between gap-4 py-3">
                     <dt class="text-sm text-stone-500">Pay</dt>
-                    <dd class="text-sm font-medium text-stone-900">£{{ shift.estimated_earnings }}</dd>
+                    <dd class="text-sm font-medium text-stone-900">{{ prefs.currency_symbol }}{{ shift.estimated_earnings }}</dd>
                 </div>
                 <div class="flex items-start justify-between gap-4 py-3">
                     <dt class="text-sm text-stone-500">Notes</dt>
@@ -89,11 +89,11 @@
                 </div>
                 <div class="flex items-start justify-between gap-4 py-3">
                     <dt class="text-sm text-stone-500">Logged</dt>
-                    <dd class="text-sm font-medium text-stone-900">{{ shift.created_at|date:"j M Y, H:i" }}</dd>
+                    <dd class="text-sm font-medium text-stone-900">{{ shift.created_at|date:prefs.date_datetime }}</dd>
                 </div>
                 <div class="flex items-start justify-between gap-4 py-3 last:pb-0">
                     <dt class="text-sm text-stone-500">Last updated</dt>
-                    <dd class="text-sm font-medium text-stone-900">{{ shift.updated_at|date:"j M Y, H:i" }}</dd>
+                    <dd class="text-sm font-medium text-stone-900">{{ shift.updated_at|date:prefs.date_datetime }}</dd>
                 </div>
             </dl>
 

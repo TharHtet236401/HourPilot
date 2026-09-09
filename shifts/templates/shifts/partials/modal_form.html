@@ -14,7 +14,7 @@
                 </h2>
                 {% if copied_from %}
                     <p class="mt-1 text-sm text-stone-500">
-                        Copied from {{ copied_from.workplace.name }} on {{ copied_from.date|date:"j M" }}.
+                        Copied from {{ copied_from.workplace.name }} on {{ copied_from.date|date:prefs.date_short }}.
                     </p>
                 {% endif %}
             </div>

@@ -10,7 +10,7 @@
             <div>
                 <p class="text-xs font-medium uppercase tracking-[0.18em] text-teal-800">Day</p>
                 <h2 id="calendar-day-title" class="mt-1 font-serif text-2xl tracking-tight text-stone-900">
-                    {% if selected %}{{ selected|date:"l j F" }}{% else %}This day{% endif %}
+                    {% if selected %}{{ selected|date:prefs.date_long }}{% else %}This day{% endif %}
                 </h2>
             </div>
             <button
@@ -33,7 +33,7 @@
             <p class="mt-3 text-sm text-stone-500">
                 {{ day_summary.count }} shift{{ day_summary.count|pluralize }}
                 · {{ day_summary.hours_display }}
-                · £{{ day_summary.pay }}
+                · {{ prefs.currency_symbol }}{{ day_summary.pay }}
             </p>
             <ul class="mt-4 divide-y divide-stone-100">
                 {% for shift in selected_shifts %}
@@ -55,7 +55,7 @@
                                 </p>
                             </div>
                             <div class="flex shrink-0 flex-col items-end gap-1">
-                                <p class="font-semibold text-stone-900">£{{ shift.estimated_earnings }}</p>
+                                <p class="font-semibold text-stone-900">{{ prefs.currency_symbol }}{{ shift.estimated_earnings }}</p>
                                 <button
                                     type="button"
                                     onclick="event.stopPropagation()"
