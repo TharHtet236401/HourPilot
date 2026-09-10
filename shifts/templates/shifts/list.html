@@ -6,7 +6,7 @@
 <div class="page-pad">
     <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div class="min-w-0">
-            <p class="text-xs font-medium uppercase tracking-[0.18em] text-teal-800">Shifts</p>
+            <p class="text-xs font-medium uppercase tracking-[0.18em] text-brand">Shifts</p>
             <h1 class="mt-2 font-serif text-2xl tracking-tight text-stone-900 sm:text-3xl">Your shifts</h1>
             <p class="mt-2 hidden max-w-xl text-sm leading-6 text-stone-500 sm:block">
                 Hours you have already logged, with duration and estimated pay.
@@ -38,7 +38,7 @@
                 hx-get="{% url 'shift_create' %}"
                 hx-target="#modal"
                 hx-swap="innerHTML"
-                class="min-h-11 w-full touch-manipulation rounded-xl bg-teal-800 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700 sm:w-auto"
+                class="min-h-11 w-full touch-manipulation rounded-xl bg-brand px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-hover sm:w-auto"
             >
                 Add shift
             </button>

@@ -8,7 +8,7 @@
     <div class="modal-panel">
         <div class="flex items-start justify-between gap-3">
             <div>
-                <p class="text-xs font-medium uppercase tracking-[0.18em] text-teal-800">Shift</p>
+                <p class="text-xs font-medium uppercase tracking-[0.18em] text-brand">Shift</p>
                 <h2 id="shift-modal-title" class="mt-1 font-serif text-2xl tracking-tight text-stone-900">
                     {% if shift %}Edit shift{% else %}Add shift{% endif %}
                 </h2>
@@ -45,7 +45,7 @@
                     hx-get="{% url 'shift_create' %}?repeat=1{% if selected_day %}&day={{ selected_day }}{% endif %}"
                     hx-target="#modal"
                     hx-swap="innerHTML"
-                    class="text-sm font-medium text-teal-800 hover:underline"
+                    class="text-sm font-medium text-brand hover:underline"
                 >
                     Copy last shift ({{ last_shift.workplace.name }}, {{ last_shift.start_time }}–{{ last_shift.end_time }})
                 </button>
@@ -87,7 +87,7 @@
                 </button>
                 <button
                     type="submit"
-                    class="rounded-xl bg-teal-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-700"
+                    class="rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-hover"
                 >
                     {% if shift %}Save changes{% else %}Save shift{% endif %}
                 </button>

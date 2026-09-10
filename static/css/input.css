@@ -3,6 +3,9 @@
 @theme {
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Fraunces", ui-serif, Georgia, serif;
+  --color-brand: #0b2a6b;
+  --color-brand-hover: #13398c;
+  --color-brand-accent: #00a8ff;
 }
 
 @layer components {
@@ -15,11 +18,11 @@
   .form-control input:not([type]),
   .form-control select,
   .form-control textarea {
-    @apply mt-1.5 block min-h-11 w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-base text-stone-900 shadow-sm outline-none transition placeholder:text-stone-400 focus:border-teal-700 focus:ring-4 focus:ring-teal-700/10 sm:text-sm;
+    @apply mt-1.5 block min-h-11 w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-base text-stone-900 shadow-sm outline-none transition placeholder:text-stone-400 focus:border-brand-accent focus:ring-4 focus:ring-brand-accent/15 sm:text-sm;
   }
 
   .form-control input[type="checkbox"] {
-    @apply size-5 rounded border-stone-300 text-teal-700 accent-teal-700 focus:ring-teal-700/20 sm:size-4;
+    @apply size-5 rounded border-stone-300 text-brand accent-brand focus:ring-brand-accent/20 sm:size-4;
   }
 
   .page-pad {
@@ -60,7 +63,7 @@
   }
 
   .form-control .helptext a {
-    @apply font-medium text-teal-800 underline-offset-2 hover:underline;
+    @apply font-medium text-brand underline-offset-2 hover:underline;
   }
 
   .form-control input[aria-invalid="true"],

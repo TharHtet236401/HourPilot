@@ -43,7 +43,7 @@
                     </a>
                     <a
                         href="{% url 'account_signup' %}"
-                        class="rounded-lg bg-teal-800 px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-teal-700"
+                        class="rounded-lg bg-brand px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-brand-hover"
                     >
                         Sign up
                     </a>
@@ -103,7 +103,7 @@
             root.querySelectorAll("[data-export-range]").forEach((button) => {
                 const active = button.dataset.exportRange === key;
                 button.setAttribute("aria-pressed", active ? "true" : "false");
-                button.classList.toggle("bg-teal-800", active);
+                button.classList.toggle("bg-brand", active);
                 button.classList.toggle("text-white", active);
                 button.classList.toggle("shadow-sm", active);
                 button.classList.toggle("bg-stone-100", !active);
@@ -296,7 +296,7 @@
             root.querySelectorAll("[data-pie-mode]").forEach((button) => {
                 const active = button.dataset.pieMode === mode;
                 button.setAttribute("aria-pressed", active ? "true" : "false");
-                button.classList.toggle("bg-teal-800", active);
+                button.classList.toggle("bg-brand", active);
                 button.classList.toggle("text-white", active);
                 button.classList.toggle("shadow-sm", active);
                 button.classList.toggle("bg-stone-100", !active);

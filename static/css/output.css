@@ -40,7 +40,6 @@
     --color-teal-50: oklch(98.4% 0.014 180.72);
     --color-teal-100: oklch(95.3% 0.051 180.801);
     --color-teal-600: oklch(60% 0.118 184.704);
-    --color-teal-700: oklch(51.1% 0.096 186.391);
     --color-teal-800: oklch(43.7% 0.078 188.216);
     --color-sky-50: oklch(97.7% 0.013 236.62);
     --color-sky-100: oklch(95.1% 0.026 236.824);
@@ -110,6 +109,9 @@
     --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     --default-font-family: var(--font-sans);
     --default-mono-font-family: var(--font-mono);
+    --color-brand: #0b2a6b;
+    --color-brand-hover: #13398c;
+    --color-brand-accent: #00a8ff;
   }
 }
 @layer base {
@@ -700,6 +702,21 @@
   .bg-blue-50 {
     background-color: var(--color-blue-50);
   }
+  .bg-brand {
+    background-color: var(--color-brand);
+  }
+  .bg-brand-accent\/80 {
+    background-color: color-mix(in srgb, #00a8ff 80%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-brand-accent) 80%, transparent);
+    }
+  }
+  .bg-brand\/10 {
+    background-color: color-mix(in srgb, #0b2a6b 10%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-brand) 10%, transparent);
+    }
+  }
   .bg-green-50 {
     background-color: var(--color-green-50);
   }
@@ -724,21 +741,6 @@
       background-color: color-mix(in oklab, var(--color-stone-900) 40%, transparent);
     }
   }
-  .bg-teal-50 {
-    background-color: var(--color-teal-50);
-  }
-  .bg-teal-600\/80 {
-    background-color: color-mix(in srgb, oklch(60% 0.118 184.704) 80%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      background-color: color-mix(in oklab, var(--color-teal-600) 80%, transparent);
-    }
-  }
-  .bg-teal-700 {
-    background-color: var(--color-teal-700);
-  }
-  .bg-teal-800 {
-    background-color: var(--color-teal-800);
-  }
   .bg-white {
     background-color: var(--color-white);
   }
@@ -757,8 +759,8 @@
   .bg-yellow-50 {
     background-color: var(--color-yellow-50);
   }
-  .bg-\[radial-gradient\(ellipse_at_top\,_rgba\(15\,118\,110\,0\.08\)\,_transparent_55\%\)\] {
-    background-image: radial-gradient(ellipse at top, rgba(15,118,110,0.08), transparent 55%);
+  .bg-\[radial-gradient\(ellipse_at_top\,_rgba\(11\,42\,107\,0\.10\)\,_transparent_55\%\)\] {
+    background-image: radial-gradient(ellipse at top, rgba(11,42,107,0.10), transparent 55%);
   }
   .p-1 {
     padding: var(--spacing);
@@ -938,6 +940,9 @@
   .text-blue-800 {
     color: var(--color-blue-800);
   }
+  .text-brand {
+    color: var(--color-brand);
+  }
   .text-green-400 {
     color: var(--color-green-400);
   }
@@ -985,9 +990,6 @@
   }
   .text-stone-900 {
     color: var(--color-stone-900);
-  }
-  .text-teal-800 {
-    color: var(--color-teal-800);
   }
   .text-white {
     color: var(--color-white);
@@ -1067,6 +1069,9 @@
     .hover\:bg-blue-100:hover {
       background-color: var(--color-blue-100);
     }
+    .hover\:bg-brand-hover:hover {
+      background-color: var(--color-brand-hover);
+    }
     .hover\:bg-green-100:hover {
       background-color: var(--color-green-100);
     }
@@ -1096,11 +1101,11 @@
     .hover\:bg-stone-200:hover {
       background-color: var(--color-stone-200);
     }
-    .hover\:bg-teal-700:hover {
-      background-color: var(--color-teal-700);
-    }
     .hover\:bg-yellow-100:hover {
       background-color: var(--color-yellow-100);
+    }
+    .hover\:text-brand:hover {
+      color: var(--color-brand);
     }
     .hover\:text-stone-700:hover {
       color: var(--color-stone-700);
@@ -1111,9 +1116,6 @@
     .hover\:text-stone-900:hover {
       color: var(--color-stone-900);
     }
-    .hover\:text-teal-800:hover {
-      color: var(--color-teal-800);
-    }
     .hover\:underline:hover {
       text-decoration-line: underline;
     }
@@ -1122,10 +1124,10 @@
     --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(4px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
-  .focus\:ring-teal-700\/20:focus {
-    --tw-ring-color: color-mix(in srgb, oklch(51.1% 0.096 186.391) 20%, transparent);
+  .focus\:ring-brand-accent\/20:focus {
+    --tw-ring-color: color-mix(in srgb, #00a8ff 20%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
-      --tw-ring-color: color-mix(in oklab, var(--color-teal-700) 20%, transparent);
+      --tw-ring-color: color-mix(in oklab, var(--color-brand-accent) 20%, transparent);
     }
   }
   .focus\:outline-none:focus {
@@ -1354,16 +1356,16 @@
       color: var(--color-stone-400);
     }
     &:focus {
-      border-color: var(--color-teal-700);
+      border-color: var(--color-brand-accent);
     }
     &:focus {
       --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(4px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
       box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
     }
     &:focus {
-      --tw-ring-color: color-mix(in srgb, oklch(51.1% 0.096 186.391) 10%, transparent);
+      --tw-ring-color: color-mix(in srgb, #00a8ff 15%, transparent);
       @supports (color: color-mix(in lab, red, red)) {
-        --tw-ring-color: color-mix(in oklab, var(--color-teal-700) 10%, transparent);
+        --tw-ring-color: color-mix(in oklab, var(--color-brand-accent) 15%, transparent);
       }
     }
     @media (width >= 40rem) {
@@ -1376,12 +1378,12 @@
     height: calc(var(--spacing) * 5);
     border-radius: 0.25rem;
     border-color: var(--color-stone-300);
-    color: var(--color-teal-700);
-    accent-color: var(--color-teal-700);
+    color: var(--color-brand);
+    accent-color: var(--color-brand);
     &:focus {
-      --tw-ring-color: color-mix(in srgb, oklch(51.1% 0.096 186.391) 20%, transparent);
+      --tw-ring-color: color-mix(in srgb, #00a8ff 20%, transparent);
       @supports (color: color-mix(in lab, red, red)) {
-        --tw-ring-color: color-mix(in oklab, var(--color-teal-700) 20%, transparent);
+        --tw-ring-color: color-mix(in oklab, var(--color-brand-accent) 20%, transparent);
       }
     }
     @media (width >= 40rem) {
@@ -1505,7 +1507,7 @@
   .form-control .helptext a {
     --tw-font-weight: var(--font-weight-medium);
     font-weight: var(--font-weight-medium);
-    color: var(--color-teal-800);
+    color: var(--color-brand);
     text-underline-offset: 2px;
     &:hover {
       @media (hover: hover) {

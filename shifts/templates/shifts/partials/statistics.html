@@ -7,7 +7,7 @@
                 hx-target="#stats-root"
                 hx-swap="innerHTML"
                 hx-push-url="true"
-                class="inline-flex min-h-11 items-center rounded-xl px-3.5 text-sm font-medium transition {% if stats.period == item.key %}bg-teal-800 text-white shadow-sm{% else %}bg-stone-100 text-stone-700 hover:bg-stone-200{% endif %}"
+                class="inline-flex min-h-11 items-center rounded-xl px-3.5 text-sm font-medium transition {% if stats.period == item.key %}bg-brand text-white shadow-sm{% else %}bg-stone-100 text-stone-700 hover:bg-stone-200{% endif %}"
             >
                 {{ item.label }}
             </a>
@@ -54,7 +54,7 @@
         <p class="text-sm text-stone-500">Earned</p>
         <p class="mt-2 break-words font-serif text-2xl tracking-tight text-stone-900 sm:text-3xl">{{ prefs.currency_symbol }}{{ stats.summary.pay }}</p>
         {% if stats.change %}
-            <p class="mt-1 text-xs {% if stats.change.up %}text-teal-800{% else %}text-rose-700{% endif %}">
+            <p class="mt-1 text-xs {% if stats.change.up %}text-brand{% else %}text-rose-700{% endif %}">
                 {% if stats.change.up %}+{% endif %}{{ stats.change.percent }}% vs previous
             </p>
         {% else %}
@@ -119,7 +119,7 @@
                                     title="{{ point.title }} · {{ prefs.currency_symbol }}{{ point.pay }} · {{ point.hours_display }}"
                                 >
                                     <div
-                                        class="w-full rounded-t-md {% if point.is_current %}bg-teal-800{% else %}bg-teal-600/80{% endif %}"
+                                        class="w-full rounded-t-md {% if point.is_current %}bg-brand{% else %}bg-brand-accent/80{% endif %}"
                                         style="height: {{ point.percent }}%"
                                     ></div>
                                 </div>
@@ -128,7 +128,7 @@
                     </div>
                     <div class="mt-1.5 flex gap-1 sm:gap-1.5">
                         {% for point in stats.timeline %}
-                            <span class="min-w-0 flex-1 text-center text-[10px] font-medium {% if point.is_current %}text-teal-800{% else %}text-stone-400{% endif %}">
+                            <span class="min-w-0 flex-1 text-center text-[10px] font-medium {% if point.is_current %}text-brand{% else %}text-stone-400{% endif %}">
                                 {{ point.label }}
                             </span>
                         {% endfor %}
@@ -149,7 +149,7 @@
                     type="button"
                     data-pie-mode="pay"
                     aria-pressed="true"
-                    class="inline-flex min-h-11 items-center rounded-xl bg-teal-800 px-3.5 text-sm font-medium text-white shadow-sm"
+                    class="inline-flex min-h-11 items-center rounded-xl bg-brand px-3.5 text-sm font-medium text-white shadow-sm"
                 >
                     Money
                 </button>
@@ -256,7 +256,7 @@
         {% endif %}
         <a
             href="{% url 'shift_list' %}"
-            class="mt-5 inline-flex min-h-11 items-center rounded-xl bg-teal-800 px-4 text-sm font-semibold text-white"
+            class="mt-5 inline-flex min-h-11 items-center rounded-xl bg-brand px-4 text-sm font-semibold text-white"
         >
             Add a shift
         </a>

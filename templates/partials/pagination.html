@@ -30,7 +30,7 @@
                 <div class="hidden items-center gap-1 sm:flex">
                     {% for num in page_obj.paginator.page_range %}
                         {% if num == page_obj.number %}
-                            <span class="inline-flex size-11 items-center justify-center rounded-xl bg-teal-800 text-sm font-semibold text-white" aria-current="page">
+                            <span class="inline-flex size-11 items-center justify-center rounded-xl bg-brand text-sm font-semibold text-white" aria-current="page">
                                 {{ num }}
                             </span>
                         {% else %}

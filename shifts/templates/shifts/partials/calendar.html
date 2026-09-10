@@ -56,7 +56,7 @@
                     aria-label="Shifts on {{ day.date|date:prefs.date_long }}"
                     class="w-full min-h-11 cursor-pointer touch-manipulation rounded-lg border-0 p-1 text-left transition sm:min-h-16 sm:rounded-xl sm:p-1.5 lg:min-h-24 lg:p-2 {% if day.color_key %}cal-cell-{{ day.color_key }}{% elif day.has_shifts %}bg-stone-100 text-stone-900 hover:bg-stone-200{% elif day.in_month %}bg-stone-50 text-stone-700 hover:bg-stone-100{% else %}bg-white text-stone-300{% endif %}"
                 >
-                    <span class="block text-[11px] font-semibold sm:text-sm {% if day.is_today %}{% if day.color_key %}cal-label-{{ day.color_key }}{% else %}text-teal-800{% endif %}{% endif %}">
+                    <span class="block text-[11px] font-semibold sm:text-sm {% if day.is_today %}{% if day.color_key %}cal-label-{{ day.color_key }}{% else %}text-brand{% endif %}{% endif %}">
                         {{ day.date.day }}
                     </span>
                     {% if day.has_shifts %}
