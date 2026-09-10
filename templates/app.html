@@ -15,14 +15,7 @@
         class="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[min(85vw,20rem)] -translate-x-full flex-col border-r border-stone-200 bg-white pt-[env(safe-area-inset-top)] transition-transform duration-200 lg:static lg:z-auto lg:w-64 lg:max-w-none lg:translate-x-0 lg:pt-0"
     >
         <div class="flex items-center justify-between gap-3 px-4 py-3 lg:py-4">
-            <a href="{% url 'home' %}" class="flex min-h-11 items-center gap-2.5 text-stone-900">
-                <span class="flex size-8 items-center justify-center rounded-lg bg-teal-800 text-white shadow-sm">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-4">
-                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .192.078.384.22.53l3.5 3.25a.75.75 0 1 0 1.06-1.06l-3.28-3.045V6Z" clip-rule="evenodd" />
-                    </svg>
-                </span>
-                <span class="font-serif text-lg tracking-tight">HourPilot</span>
-            </a>
+            {% include "partials/brand.html" %}
             <button
                 type="button"
                 class="inline-flex size-11 items-center justify-center rounded-lg text-stone-500 transition hover:bg-stone-100 hover:text-stone-900 lg:hidden"
@@ -123,9 +116,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                 </svg>
             </button>
-            <a href="{% url 'home' %}" class="font-serif text-lg tracking-tight text-stone-900">
-                HourPilot
-            </a>
+            {% include "partials/brand.html" %}
         </header>
 
         <div class="min-w-0 max-w-full flex-1 overflow-x-hidden">
