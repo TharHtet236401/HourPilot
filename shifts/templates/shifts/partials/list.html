@@ -1,3 +1,5 @@
+{% include "shifts/partials/filters.html" %}
+
 {% if shifts %}
     <ul class="divide-y divide-stone-100 overflow-visible rounded-2xl border border-stone-200/80 bg-white shadow-sm lg:hidden">
         {% for shift in shifts %}
@@ -72,8 +74,23 @@
     </div>
 {% else %}
     <div class="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-12 text-center">
-        <p class="font-medium text-stone-800">No shifts logged yet</p>
-        <p class="mt-1 text-sm text-stone-500">Add a shift after you finish work.</p>
+        {% if filters_active %}
+            <p class="font-medium text-stone-800">No shifts match these filters</p>
+            <p class="mt-1 text-sm text-stone-500">Try a different workplace, date range, or duration.</p>
+            <a
+                href="{% url 'shift_list' %}"
+                hx-get="{% url 'shift_list' %}"
+                hx-target="#shift-list"
+                hx-swap="innerHTML show:window:top"
+                hx-push-url="true"
+                class="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-stone-100 px-4 text-sm font-medium text-stone-700 transition hover:bg-stone-200"
+            >
+                Clear filters
+            </a>
+        {% else %}
+            <p class="font-medium text-stone-800">No shifts logged yet</p>
+            <p class="mt-1 text-sm text-stone-500">Add a shift after you finish work.</p>
+        {% endif %}
     </div>
 {% endif %}
 

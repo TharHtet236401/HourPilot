@@ -241,6 +241,22 @@
             initExportRange();
             syncBodyScrollLock();
         });
+        document.addEventListener("htmx:configRequest", (event) => {
+            const source = event.detail.elt;
+            if (!source?.closest?.("[data-filter-form]") && source?.id !== "shift-filters") {
+                return;
+            }
+            const params = event.detail.parameters;
+            if (!params) {
+                return;
+            }
+            Object.keys(params).forEach((key) => {
+                const value = params[key];
+                if (value === "" || value == null) {
+                    delete params[key];
+                }
+            });
+        });
         document.addEventListener("htmx:beforeRequest", (event) => {
             if (event.target.closest("[data-menu-toggle]")) {
                 return;
@@ -281,6 +297,9 @@
                     toInput.value = rangeButton.dataset.to || "";
                 }
                 setExportRangeActive(form, rangeButton.dataset.exportRange);
+                if (form?.hasAttribute("data-filter-form") && window.htmx) {
+                    window.htmx.trigger(form, "submit");
+                }
                 return;
             }
 

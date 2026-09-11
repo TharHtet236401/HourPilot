@@ -1,3 +1,4 @@
+{% load list_pages %}
 {% if page_obj and page_obj.paginator.num_pages > 1 %}
     <nav class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" aria-label="Pagination">
         <p class="text-sm text-stone-500">
@@ -6,9 +7,10 @@
         </p>
         <div class="flex flex-wrap items-center gap-2">
             {% if page_obj.has_previous %}
+                {% list_href page_url_name page_obj.previous_page_number page_query as prev_url %}
                 <a
-                    href="{% if page_obj.previous_page_number == 1 %}{% url page_url_name %}{% else %}{% url page_url_name %}?page={{ page_obj.previous_page_number }}{% endif %}"
-                    hx-get="{% if page_obj.previous_page_number == 1 %}{% url page_url_name %}{% else %}{% url page_url_name %}?page={{ page_obj.previous_page_number }}{% endif %}"
+                    href="{{ prev_url }}"
+                    hx-get="{{ prev_url }}"
                     hx-target="{{ list_target }}"
                     hx-swap="innerHTML show:window:top"
                     hx-push-url="true"
@@ -29,14 +31,15 @@
             {% if page_obj.paginator.num_pages <= 7 %}
                 <div class="hidden items-center gap-1 sm:flex">
                     {% for num in page_obj.paginator.page_range %}
+                        {% list_href page_url_name num page_query as page_url %}
                         {% if num == page_obj.number %}
                             <span class="inline-flex size-11 items-center justify-center rounded-xl bg-brand text-sm font-semibold text-white" aria-current="page">
                                 {{ num }}
                             </span>
                         {% else %}
                             <a
-                                href="{% if num == 1 %}{% url page_url_name %}{% else %}{% url page_url_name %}?page={{ num }}{% endif %}"
-                                hx-get="{% if num == 1 %}{% url page_url_name %}{% else %}{% url page_url_name %}?page={{ num }}{% endif %}"
+                                href="{{ page_url }}"
+                                hx-get="{{ page_url }}"
                                 hx-target="{{ list_target }}"
                                 hx-swap="innerHTML show:window:top"
                                 hx-push-url="true"
@@ -54,9 +57,10 @@
             {% endif %}
 
             {% if page_obj.has_next %}
+                {% list_href page_url_name page_obj.next_page_number page_query as next_url %}
                 <a
-                    href="{% url page_url_name %}?page={{ page_obj.next_page_number }}"
-                    hx-get="{% url page_url_name %}?page={{ page_obj.next_page_number }}"
+                    href="{{ next_url }}"
+                    hx-get="{{ next_url }}"
                     hx-target="{{ list_target }}"
                     hx-swap="innerHTML show:window:top"
                     hx-push-url="true"

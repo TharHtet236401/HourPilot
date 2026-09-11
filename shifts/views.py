@@ -3,7 +3,7 @@ from urllib.parse import parse_qs, urlparse
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -17,9 +17,10 @@ from config.pagination import (
 from workspaces.models import Workplace
 
 from .export import export_filename, filtered_shifts, shifts_csv
-from .forms import ShiftExportForm, ShiftForm
+from .forms import ShiftExportForm, ShiftFilterForm, ShiftForm
 from .models import Shift
 from .services import (
+    apply_shift_filters,
     calendar_month,
     dashboard_stats,
     empty_calendar_month,
@@ -40,6 +41,27 @@ def _last_user_shift(user):
 
 def _current_url(request):
     return request.headers.get("HX-Current-URL") or request.build_absolute_uri()
+
+
+def _request_query(request):
+    if request.GET:
+        return request.GET
+    current = request.headers.get("HX-Current-URL")
+    if current:
+        return QueryDict(urlparse(current).query)
+    return request.GET
+
+
+def _filter_presets(request):
+    today = timezone.localdate()
+    return {
+        "today": today.isoformat(),
+        "week_start": week_start_date(
+            today, prefs_for(request.user).week_start
+        ).isoformat(),
+        "month_start": today.replace(day=1).isoformat(),
+        "year_start": today.replace(month=1, day=1).isoformat(),
+    }
 
 
 def _request_on_calendar(request):
@@ -93,8 +115,11 @@ def _create_form_context(request, form, copied_from=None, extra=None):
 
 
 def _shift_list_context(request, page=None):
+    query = _request_query(request)
+    form = ShiftFilterForm(query or None, user=request.user)
+    queryset = apply_shift_filters(_user_shifts(request.user), form)
     page_obj = paginate(
-        _user_shifts(request.user),
+        queryset,
         page if page is not None else page_number_from_request(request),
         SHIFT_PAGE_SIZE,
     )
@@ -103,7 +128,25 @@ def _shift_list_context(request, page=None):
         "page_obj": page_obj,
         "page_url_name": "shift_list",
         "list_target": "#shift-list",
+        "page_query": query,
         "last_shift": _last_user_shift(request.user),
+        "filter_form": form,
+        "filters_active": form.has_filters(),
+        **_filter_presets(request),
+    }
+
+
+def _empty_shift_list_context(request):
+    form = ShiftFilterForm(user=request.user)
+    return {
+        "shifts": [],
+        "page_obj": None,
+        "page_url_name": "shift_list",
+        "list_target": "#shift-list",
+        "last_shift": None,
+        "filter_form": form,
+        "filters_active": False,
+        **_filter_presets(request),
     }
 
 
@@ -111,7 +154,11 @@ def _shift_form_success(request, message, page=None):
     context = _shift_list_context(request, page=page)
     context["message"] = message
     response = render(request, "shifts/partials/list_refresh.html", context)
-    response["HX-Push-Url"] = list_page_url("shift_list", context["page_obj"].number)
+    response["HX-Push-Url"] = list_page_url(
+        "shift_list",
+        context["page_obj"].number,
+        _request_query(request),
+    )
     return response
 
 
@@ -301,12 +348,7 @@ def shift_list(request):
         return render(
             request,
             template,
-            {
-                "shifts": [],
-                "page_obj": None,
-                "page_url_name": "shift_list",
-                "list_target": "#shift-list",
-            },
+            _empty_shift_list_context(request),
         )
 
 

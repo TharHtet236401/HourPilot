@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 
 from django import forms
 from django.db.models import Q
@@ -136,3 +137,73 @@ class ShiftExportForm(forms.Form):
         if date_from and date_to and date_from > date_to:
             self.add_error("date_to", "End date must be on or after the start date.")
         return cleaned_data
+
+
+class ShiftFilterForm(ShiftExportForm):
+    duration_min = forms.DecimalField(
+        required=False,
+        min_value=Decimal(0),
+        max_value=Decimal(24),
+        decimal_places=2,
+        label="Min hours",
+        widget=forms.NumberInput(
+            attrs={
+                "min": "0",
+                "max": "24",
+                "step": "0.5",
+                "placeholder": "Any",
+            }
+        ),
+    )
+    duration_max = forms.DecimalField(
+        required=False,
+        min_value=Decimal(0),
+        max_value=Decimal(24),
+        decimal_places=2,
+        label="Max hours",
+        widget=forms.NumberInput(
+            attrs={
+                "min": "0",
+                "max": "24",
+                "step": "0.5",
+                "placeholder": "Any",
+            }
+        ),
+    )
+
+    def __init__(self, *args, user=None, **kwargs):
+        kwargs.setdefault("auto_id", "id_shift_filter_%s")
+        super().__init__(*args, user=user, **kwargs)
+        self.fields["workplace"].label_from_instance = (
+            lambda workplace: workplace.name
+            if workplace.is_active
+            else f"{workplace.name} (inactive)"
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        duration_min = cleaned_data.get("duration_min")
+        duration_max = cleaned_data.get("duration_max")
+        if (
+            duration_min is not None
+            and duration_max is not None
+            and duration_min > duration_max
+        ):
+            self.add_error(
+                "duration_max",
+                "Maximum hours must be at least the minimum.",
+            )
+        return cleaned_data
+
+    def has_filters(self):
+        data = getattr(self, "cleaned_data", None) or {}
+        return any(
+            data.get(name) not in (None, "")
+            for name in (
+                "workplace",
+                "date_from",
+                "date_to",
+                "duration_min",
+                "duration_max",
+            )
+        )

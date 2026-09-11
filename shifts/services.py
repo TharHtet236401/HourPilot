@@ -2,8 +2,10 @@ import calendar
 import math
 from collections import defaultdict
 from datetime import date, timedelta
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 
+from django.db.models import IntegerField
+from django.db.models.expressions import RawSQL
 from django.utils import timezone
 
 from accounts.prefs import (
@@ -13,6 +15,61 @@ from accounts.prefs import (
     week_start_date,
 )
 from workspaces.colors import workplace_color_hex, workplace_color_key
+
+from .models import Shift
+
+
+def _hours_to_minutes(hours):
+    return int((Decimal(hours) * 60).quantize(Decimal(1), rounding=ROUND_HALF_UP))
+
+
+def duration_minutes_expression():
+    table = Shift._meta.db_table
+    return RawSQL(
+        f"""
+        (
+          CASE
+            WHEN {table}.end_time <= {table}.start_time
+              THEN FLOOR(EXTRACT(EPOCH FROM ({table}.end_time - {table}.start_time)) / 60) + 1440
+            ELSE FLOOR(EXTRACT(EPOCH FROM ({table}.end_time - {table}.start_time)) / 60)
+          END
+          - {table}.break_minutes
+        )
+        """,
+        [],
+        output_field=IntegerField(),
+    )
+
+
+def apply_shift_filters(queryset, form):
+    if not form.is_bound:
+        return queryset
+
+    form.is_valid()
+    data = getattr(form, "cleaned_data", {}) or {}
+    workplace = data.get("workplace")
+    date_from = data.get("date_from")
+    date_to = data.get("date_to")
+    duration_min = data.get("duration_min")
+    duration_max = data.get("duration_max")
+
+    if workplace:
+        queryset = queryset.filter(workplace=workplace)
+    if date_from:
+        queryset = queryset.filter(date__gte=date_from)
+    if date_to:
+        queryset = queryset.filter(date__lte=date_to)
+    if duration_min is not None or duration_max is not None:
+        queryset = queryset.annotate(_duration_minutes=duration_minutes_expression())
+        if duration_min is not None:
+            queryset = queryset.filter(
+                _duration_minutes__gte=_hours_to_minutes(duration_min)
+            )
+        if duration_max is not None:
+            queryset = queryset.filter(
+                _duration_minutes__lte=_hours_to_minutes(duration_max)
+            )
+    return queryset
 
 
 def format_minutes(minutes):
