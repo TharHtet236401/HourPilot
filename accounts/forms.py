@@ -1,11 +1,7 @@
-from allauth.account.models import EmailAddress
 from django import forms
-from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordChangeForm
 
 from .models import Profile
-
-User = get_user_model()
 
 
 def _mark_invalid(form):
@@ -58,43 +54,6 @@ class PreferencesForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["weekly_hour_goal"].required = False
         _mark_invalid(self)
-
-
-class EmailChangeForm(forms.Form):
-    email = forms.EmailField(
-        label="New email",
-        widget=forms.EmailInput(attrs={"autocomplete": "email"}),
-    )
-    password = forms.CharField(
-        label="Current password",
-        strip=False,
-        widget=forms.PasswordInput(attrs={"autocomplete": "current-password"}),
-    )
-
-    def __init__(self, user, *args, **kwargs):
-        self.user = user
-        super().__init__(*args, **kwargs)
-        _mark_invalid(self)
-
-    def clean_email(self):
-        email = self.cleaned_data["email"].strip()
-        if email.lower() == (self.user.email or "").lower():
-            raise forms.ValidationError("That is already your email.")
-        taken = (
-            User.objects.filter(email__iexact=email).exclude(pk=self.user.pk).exists()
-            or EmailAddress.objects.filter(email__iexact=email)
-            .exclude(user=self.user)
-            .exists()
-        )
-        if taken:
-            raise forms.ValidationError("That email is already in use.")
-        return email
-
-    def clean_password(self):
-        password = self.cleaned_data["password"]
-        if not self.user.check_password(password):
-            raise forms.ValidationError("That password is not correct.")
-        return password
 
 
 class AccountPasswordForm(PasswordChangeForm):
